@@ -91,7 +91,9 @@ describe('Layout', () => {
       );
 
       expect(screen.getByRole('banner')).toBeInTheDocument(); // header
-      expect(screen.getByRole('navigation')).toBeInTheDocument(); // sidebar
+      // Sidebar renders navigation for desktop and mobile (2 instances)
+      const navs = screen.getAllByRole('navigation');
+      expect(navs.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByRole('contentinfo')).toBeInTheDocument(); // footer
       expect(screen.getByRole('main')).toBeInTheDocument(); // main content
     });
@@ -118,7 +120,8 @@ describe('Layout', () => {
 
       // Verify all parts are present
       expect(screen.getByRole('banner')).toBeInTheDocument();
-      expect(screen.getByRole('navigation')).toBeInTheDocument();
+      const navs = screen.getAllByRole('navigation');
+      expect(navs.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByRole('main')).toBeInTheDocument();
       expect(screen.getByRole('contentinfo')).toBeInTheDocument();
       expect(screen.getByTestId('page-content')).toBeInTheDocument();
