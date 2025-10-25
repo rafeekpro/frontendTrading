@@ -25,16 +25,17 @@ describe('SearchBar', () => {
     expect(input).toBeInTheDocument();
   });
 
-  it('should call onChange when user types', async () => {
+  it('should call onChange when user types (immediately for controlled input)', async () => {
     const user = userEvent.setup();
     const handleChange = vi.fn();
 
     render(<SearchBar value="" onChange={handleChange} />);
 
     const input = screen.getByRole('textbox');
-    await user.type(input, 'EUR');
+    await user.type(input, 'E');
 
-    expect(handleChange).toHaveBeenCalled();
+    // onChange called immediately for controlled input
+    expect(handleChange).toHaveBeenCalledWith('E');
   });
 
   it('should display search icon', () => {
@@ -71,7 +72,7 @@ describe('SearchBar', () => {
     expect(handleChange).toHaveBeenCalledWith('');
   });
 
-  it('should debounce onChange calls', async () => {
+  it('should update input value immediately (controlled behavior)', async () => {
     const user = userEvent.setup();
     const handleChange = vi.fn();
 
@@ -79,21 +80,14 @@ describe('SearchBar', () => {
 
     const input = screen.getByRole('textbox');
 
-    // Type multiple characters quickly
+    // Type multiple characters
     await user.type(input, 'EUR');
 
-    // Initially, onChange should be called for each keystroke (controlled input)
-    // But the debounced callback should only be called after delay
-    expect(handleChange).toHaveBeenCalled();
-
-    // Wait for debounce delay (300ms + buffer)
-    await waitFor(
-      () => {
-        // The final debounced value should be set
-        expect(handleChange).toHaveBeenLastCalledWith('EUR');
-      },
-      { timeout: 500 }
-    );
+    // onChange called for each keystroke (E, U, R)
+    expect(handleChange).toHaveBeenCalledTimes(3);
+    expect(handleChange).toHaveBeenNthCalledWith(1, 'E');
+    expect(handleChange).toHaveBeenNthCalledWith(2, 'EU');
+    expect(handleChange).toHaveBeenNthCalledWith(3, 'EUR');
   });
 
   it('should use custom placeholder when provided', () => {
@@ -143,11 +137,13 @@ describe('SearchBar', () => {
   });
 
   it('should apply Squaber-style design classes', () => {
-    const { container } = render(<SearchBar value="" onChange={() => {}} />);
+    render(<SearchBar value="" onChange={() => {}} />);
 
-    // Check for dark theme classes
-    const searchBarContainer = container.firstChild;
-    expect(searchBarContainer).toHaveClass(/dark|bg-/);
+    // Check for dark theme input classes
+    const input = screen.getByRole('textbox');
+    expect(input).toHaveClass('bg-gray-800');
+    expect(input).toHaveClass('border-gray-700');
+    expect(input).toHaveClass('text-white');
   });
 
   it('should be keyboard accessible', async () => {

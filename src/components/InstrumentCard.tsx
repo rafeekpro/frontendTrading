@@ -6,6 +6,12 @@
 import { Star, TrendingUp, TrendingDown } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import type { Instrument } from '../types/trading';
+import {
+  getChartColor,
+  getTextColorClass,
+  formatPercentage,
+  formatPrice,
+} from '../lib/chart-utils';
 
 interface SparklineDataPoint {
   timestamp: number;
@@ -54,27 +60,6 @@ export function InstrumentCard({
     onToggleFavorite?.(instrument.id);
   };
 
-  const formatPrice = (price: number): string => {
-    return price.toFixed(instrument.precision);
-  };
-
-  const formatChange = (change: number): string => {
-    const sign = change > 0 ? '+' : '';
-    return `${sign}${change.toFixed(2)}%`;
-  };
-
-  const getChangeColor = () => {
-    if (isPositiveChange) return 'text-green-500';
-    if (isNegativeChange) return 'text-red-500';
-    return 'text-gray-400';
-  };
-
-  const getSparklineColor = () => {
-    if (isPositiveChange) return '#22c55e'; // green-500
-    if (isNegativeChange) return '#ef4444'; // red-500
-    return '#9ca3af'; // gray-400
-  };
-
   return (
     <div className="relative">
       {/* Main Card - clickable for navigation */}
@@ -99,7 +84,7 @@ export function InstrumentCard({
         {/* Current Price */}
         <div className="mb-2">
           <p className="text-2xl font-semibold text-white">
-            {formatPrice(currentPrice)}
+            {formatPrice(currentPrice, instrument.precision)}
           </p>
         </div>
 
@@ -119,8 +104,8 @@ export function InstrumentCard({
               data-testid="trending-down-icon"
             />
           )}
-          <span className={`text-sm font-medium ${getChangeColor()}`}>
-            {formatChange(change24h)}
+          <span className={`text-sm font-medium ${getTextColorClass(change24h)}`}>
+            {formatPercentage(change24h)}
           </span>
         </div>
 
@@ -131,7 +116,7 @@ export function InstrumentCard({
               <Line
                 type="monotone"
                 dataKey="close"
-                stroke={getSparklineColor()}
+                stroke={getChartColor(change24h)}
                 strokeWidth={2}
                 dot={false}
                 isAnimationActive={false}

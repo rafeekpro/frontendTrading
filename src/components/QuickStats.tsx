@@ -4,6 +4,7 @@
  */
 
 import { TrendingUp, Briefcase, Bell } from 'lucide-react';
+import { formatCurrency, getTextColorClass } from '../lib/chart-utils';
 
 export interface QuickStatsProps {
   totalPnL: number;
@@ -26,24 +27,6 @@ export function QuickStats({
   openPositions,
   activeAlerts,
 }: QuickStatsProps) {
-  const formatCurrency = (value: number): string => {
-    const absValue = Math.abs(value);
-    const formatted = absValue.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-
-    if (value < 0) {
-      return `-$${formatted}`;
-    }
-    return `$${formatted}`;
-  };
-
-  const getPnLColor = () => {
-    if (totalPnL > 0) return 'text-green-500';
-    if (totalPnL < 0) return 'text-red-500';
-    return 'text-gray-400';
-  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -58,7 +41,7 @@ export function QuickStats({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <p className="text-sm text-gray-400 mb-2">Total P&L</p>
-            <p className={`text-2xl font-bold ${getPnLColor()}`}>
+            <p className={`text-2xl font-bold ${getTextColorClass(totalPnL)}`}>
               {formatCurrency(totalPnL)}
             </p>
           </div>
@@ -71,7 +54,7 @@ export function QuickStats({
           >
             <TrendingUp
               size={24}
-              className={getPnLColor()}
+              className={getTextColorClass(totalPnL)}
               data-testid="pnl-icon"
             />
           </div>
