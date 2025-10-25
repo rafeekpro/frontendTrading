@@ -122,6 +122,75 @@ Custom bridge network for service isolation:
 - Allows future backend service integration
 - Isolated from other Docker projects
 
+### Mock Service Worker (MSW)
+
+The application uses **Mock Service Worker** for API mocking in development mode:
+
+**Features:**
+- Intercepts browser fetch requests
+- Returns realistic mock data
+- Automatic network delays (100-300ms)
+- Development-only (disabled in production builds)
+
+**Handled Endpoints:**
+```
+Authentication:
+- POST   /api/auth/login      - User authentication
+- POST   /api/auth/register   - User registration
+- POST   /api/auth/logout     - User logout
+- GET    /api/auth/me         - Current user
+
+Instruments:
+- GET    /api/instruments               - List all instruments
+- GET    /api/instruments/:id           - Get instrument details
+- GET    /api/instruments/:id/candles   - Get candlestick data
+
+Trading:
+- POST   /api/trades          - Execute trade
+- GET    /api/trades          - List all trades
+- GET    /api/positions       - List open positions
+- POST   /api/positions/:id/close - Close position
+```
+
+**Browser Console:**
+When MSW is running, you'll see:
+```
+[MSW] Mock Service Worker started successfully
+[MSW] Intercepting API requests for development
+```
+
+**Handler Organization:**
+```
+src/mocks/
+├── handlers/
+│   ├── auth.ts         - Authentication handlers
+│   ├── instruments.ts  - Instrument data handlers
+│   ├── trading.ts      - Trading operation handlers
+│   └── index.ts        - Handler registry
+├── data/               - Mock data generators
+├── browser.ts          - MSW browser setup
+└── __tests__/          - Handler tests
+```
+
+**Adding New Handlers:**
+1. Create handler file in `src/mocks/handlers/`
+2. Follow TDD: Write tests first (RED)
+3. Implement handler (GREEN)
+4. Add to `src/mocks/handlers/index.ts`
+
+**Example Handler:**
+```typescript
+// src/mocks/handlers/example.ts
+import { http, HttpResponse, delay } from 'msw';
+
+export const exampleHandlers = [
+  http.get('http://localhost/api/example', async () => {
+    await delay(100); // Realistic delay
+    return HttpResponse.json({ data: 'example' });
+  }),
+];
+```
+
 ## Environment Variables
 
 Environment variables can be configured via `.env` file:
