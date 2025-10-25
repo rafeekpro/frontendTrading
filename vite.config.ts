@@ -1,17 +1,26 @@
 import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  plugins: [react()],
   server: {
     // Required for Docker: Enable polling for file changes
     // Without this, hot reload won't work in Docker containers
     watch: {
       usePolling: true,
     },
-    // Host configuration (already handled by Dockerfile CMD, but explicit here)
+    // Host configuration for Docker
+    // Bind to 0.0.0.0 to allow access from outside the container
     host: '0.0.0.0',
     port: 5173,
     // Enable CORS for development
     cors: true,
+    // Strict port - fail if port is already in use
+    strictPort: true,
+  },
+  // Enable optimized dependency pre-bundling
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
   },
 })
