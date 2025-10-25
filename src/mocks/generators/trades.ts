@@ -203,8 +203,9 @@ function generateExitDetails(
 
   // Generate closed timestamp (between opened and now)
   const now = Date.now();
-  const holdingTime = rng.nextFloat(0, now - openedAt);
-  const closedAt = Math.floor(openedAt + holdingTime);
+  const maxHoldingTime = Math.floor(now - openedAt);
+  const holdingTime = rng.nextInt(0, maxHoldingTime);
+  const closedAt = openedAt + holdingTime;
 
   return {
     exitPrice: exitPriceRounded,

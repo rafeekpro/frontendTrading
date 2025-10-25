@@ -26,26 +26,24 @@ describe('Mock Instruments Data', () => {
       expect(symbols).toContain('AUD/USD');
     });
 
-    it('should contain stock indices', () => {
-      const indices = mockInstruments.filter(i => i.type === 'index');
-      expect(indices.length).toBeGreaterThanOrEqual(3);
+    it('should contain stocks', () => {
+      const stocks = mockInstruments.filter(i => i.type === 'stock');
+      expect(stocks.length).toBeGreaterThanOrEqual(20);
 
-      const names = indices.map(i => i.name.toLowerCase());
-      expect(names.some(n => n.includes('s&p') || n.includes('500'))).toBe(
-        true
-      );
-      expect(names.some(n => n.includes('nasdaq'))).toBe(true);
-      expect(names.some(n => n.includes('dax'))).toBe(true);
+      const symbols = stocks.map(i => i.symbol);
+      expect(symbols).toContain('AAPL');
+      expect(symbols).toContain('GOOGL');
+      expect(symbols).toContain('MSFT');
     });
 
-    it('should contain commodities', () => {
-      const commodities = mockInstruments.filter(i => i.type === 'commodity');
-      expect(commodities.length).toBeGreaterThanOrEqual(3);
+    it('should contain cryptocurrencies', () => {
+      const crypto = mockInstruments.filter(i => i.type === 'crypto');
+      expect(crypto.length).toBeGreaterThanOrEqual(10);
 
-      const names = commodities.map(i => i.name.toLowerCase());
-      expect(names.some(n => n.includes('gold'))).toBe(true);
-      expect(names.some(n => n.includes('silver'))).toBe(true);
-      expect(names.some(n => n.includes('oil'))).toBe(true);
+      const symbols = crypto.map(i => i.symbol);
+      expect(symbols.some(s => s.includes('BTC'))).toBe(true);
+      expect(symbols.some(s => s.includes('ETH'))).toBe(true);
+      expect(symbols.some(s => s.includes('SOL'))).toBe(true);
     });
 
     it('should have valid instrument structure', () => {
@@ -64,7 +62,7 @@ describe('Mock Instruments Data', () => {
         expect(instrument.precision).toBeGreaterThanOrEqual(0);
 
         // Type should be valid
-        expect(['forex', 'index', 'commodity']).toContain(instrument.type);
+        expect(['forex', 'stock', 'crypto']).toContain(instrument.type);
 
         // Max should be greater than min
         expect(instrument.max_trade_size).toBeGreaterThan(
@@ -100,24 +98,18 @@ describe('Mock Instruments Data', () => {
       const forexPairs = mockInstruments.filter(i => i.type === 'forex');
 
       forexPairs.forEach(pair => {
-        // Most forex pairs have pip value of 0.0001
-        // Except JPY pairs which have 0.01
-        if (pair.symbol.includes('JPY')) {
-          expect(pair.pip_value).toBe(0.01);
-          expect(pair.precision).toBe(3);
-        } else {
-          expect(pair.pip_value).toBe(0.0001);
-          expect(pair.precision).toBe(5);
-        }
+        // All forex pairs have pip value of 0.0001 and precision of 5
+        expect(pair.pip_value).toBe(0.0001);
+        expect(pair.precision).toBe(5);
       });
     });
   });
 
   describe('getInstrumentById function', () => {
     it('should return instrument when ID exists', () => {
-      const instrument = getInstrumentById('EUR_USD');
+      const instrument = getInstrumentById('FOREX_EUR_USD');
       expect(instrument).toBeDefined();
-      expect(instrument?.id).toBe('EUR_USD');
+      expect(instrument?.id).toBe('FOREX_EUR_USD');
       expect(instrument?.symbol).toBe('EUR/USD');
     });
 
@@ -127,8 +119,8 @@ describe('Mock Instruments Data', () => {
     });
 
     it('should handle case sensitivity correctly', () => {
-      const upperCase = getInstrumentById('EUR_USD');
-      const lowerCase = getInstrumentById('eur_usd');
+      const upperCase = getInstrumentById('FOREX_EUR_USD');
+      const lowerCase = getInstrumentById('forex_eur_usd');
 
       // Should be case-sensitive
       expect(upperCase).toBeDefined();

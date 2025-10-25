@@ -1,249 +1,74 @@
 /**
- * Candlestick Data Generator
+ * Mock Candlestick Data
  *
- * Generates realistic OHLCV (Open, High, Low, Close, Volume) candlestick data
- * for financial instruments with deterministic random generation.
+ * Generated realistic OHLCV candlestick data for various instruments and timeframes.
+ * Uses the candlestick generator with fixed seeds for consistency.
  */
 
-import type {
-  Candlestick,
-  CandlestickGeneratorConfig,
-  Timeframe,
-} from '../../types/trading';
+import type { Candlestick, Timeframe } from '../../types/trading';
+import { generateCandlesticks } from '../generators/candlesticks';
 
 /**
- * Seeded pseudo-random number generator
- * Uses a simple LCG (Linear Congruential Generator) algorithm
- * This ensures deterministic output for testing purposes
- */
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed % 2147483647;
-    if (this.seed <= 0) this.seed += 2147483646;
-  }
-
-  /**
-   * Generate next random number between 0 and 1
-   */
-  next(): number {
-    this.seed = (this.seed * 16807) % 2147483647;
-    return (this.seed - 1) / 2147483646;
-  }
-
-  /**
-   * Generate random number in range [min, max]
-   */
-  range(min: number, max: number): number {
-    return min + this.next() * (max - min);
-  }
-}
-
-/**
- * Convert timeframe string to milliseconds
- */
-export function getTimeframeMilliseconds(timeframe: Timeframe): number {
-  const timeframeMap: Record<Timeframe, number> = {
-    M1: 60 * 1000, // 1 minute
-    M5: 5 * 60 * 1000, // 5 minutes
-    M15: 15 * 60 * 1000, // 15 minutes
-    M30: 30 * 60 * 1000, // 30 minutes
-    H1: 60 * 60 * 1000, // 1 hour
-    H4: 4 * 60 * 60 * 1000, // 4 hours
-    D1: 24 * 60 * 60 * 1000, // 1 day
-  };
-
-  return timeframeMap[timeframe];
-}
-
-/**
- * Get realistic base price for an instrument
- */
-function getBasePrice(instrumentId: string): number {
-  const basePrices: Record<string, number> = {
-    // Forex pairs
-    EUR_USD: 1.085,
-    GBP_USD: 1.265,
-    USD_JPY: 149.5,
-    AUD_USD: 0.655,
-    USD_CHF: 0.875,
-    NZD_USD: 0.595,
-
-    // Indices
-    SPX500: 4500,
-    NASDAQ100: 15500,
-    DAX40: 16000,
-    FTSE100: 7500,
-
-    // Commodities
-    XAU_USD: 2050,
-    XAG_USD: 24.5,
-    WTI_USD: 78,
-    BRENT_USD: 82,
-  };
-
-  return basePrices[instrumentId] || 100;
-}
-
-/**
- * Get realistic volatility (as percentage) for an instrument type
- */
-function getVolatility(instrumentType: string, timeframe: Timeframe): number {
-  // Base volatility by instrument type (as percentage of price)
-  const baseVolatility: Record<string, number> = {
-    forex: 0.003, // 0.3%
-    index: 0.008, // 0.8%
-    commodity: 0.012, // 1.2%
-  };
-
-  // Adjust volatility based on timeframe (longer timeframes = more movement)
-  const timeframeMultiplier: Record<Timeframe, number> = {
-    M1: 0.2,
-    M5: 0.4,
-    M15: 0.6,
-    M30: 0.8,
-    H1: 1.0,
-    H4: 2.0,
-    D1: 3.5,
-  };
-
-  const base = baseVolatility[instrumentType] || 0.005;
-  const multiplier = timeframeMultiplier[timeframe] || 1.0;
-
-  return base * multiplier;
-}
-
-/**
- * Round number to specified precision
- */
-function roundToPrecision(value: number, precision: number): number {
-  const multiplier = Math.pow(10, precision);
-  return Math.round(value * multiplier) / multiplier;
-}
-
-/**
- * Generate a single candlestick with realistic OHLCV data
- */
-function generateSingleCandlestick(
-  timestamp: number,
-  openPrice: number,
-  volatility: number,
-  precision: number,
-  random: SeededRandom
-): Candlestick {
-  // Generate price movement within volatility range
-  const priceChange = random.range(-volatility, volatility);
-  const close = openPrice * (1 + priceChange);
-
-  // Generate high and low prices
-  // High should be above both open and close
-  // Low should be below both open and close
-  const upperPrice = Math.max(openPrice, close);
-  const lowerPrice = Math.min(openPrice, close);
-
-  // Add wicks (high above upper, low below lower)
-  const wickRange = Math.abs(upperPrice - lowerPrice) * 0.5;
-  const highWick = random.range(0, wickRange);
-  const lowWick = random.range(0, wickRange);
-
-  const high = upperPrice + highWick;
-  const low = lowerPrice - lowWick;
-
-  // Generate volume (higher volume for larger price movements)
-  const baseVolume = 10000;
-  const volumeMultiplier = 1 + Math.abs(priceChange) * 100;
-  const volume = Math.round(
-    baseVolume * volumeMultiplier * random.range(0.5, 1.5)
-  );
-
-  return {
-    timestamp,
-    open: roundToPrecision(openPrice, precision),
-    high: roundToPrecision(high, precision),
-    low: roundToPrecision(low, precision),
-    close: roundToPrecision(close, precision),
-    volume,
-  };
-}
-
-/**
- * Generate an array of realistic candlestick data
+ * Generate candlesticks for a specific instrument and timeframe
+ * Uses consistent seed for reproducibility
  *
- * @param config - Configuration for candlestick generation
- * @returns Array of candlesticks in chronological order (oldest first)
- *
- * @example
- * ```typescript
- * const candlesticks = generateCandlesticks({
- *   instrument: eurUsd,
- *   timeframe: 'H1',
- *   count: 100,
- *   seed: 12345, // Optional: for deterministic output
- * });
- * ```
+ * @param instrumentId - ID of the instrument (e.g., "FOREX_EUR_USD", "STOCK_AAPL")
+ * @param timeframe - Timeframe for candlesticks
+ * @param count - Number of candlesticks to generate
+ * @returns Array of candlesticks
  */
-export function generateCandlesticks(
-  config: CandlestickGeneratorConfig
+export function getCandlesticks(
+  instrumentId: string,
+  timeframe: Timeframe = 'H1',
+  count: number = 100
 ): Candlestick[] {
-  const { instrument, timeframe, count, startTime, seed } = config;
+  // Use instrument ID as seed component for consistent but different data per instrument
+  const instrumentSeed = instrumentId
+    .split('')
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
-  // Initialize seeded random generator
-  const random = new SeededRandom(seed ?? Date.now());
-
-  // Get timeframe interval in milliseconds
-  const interval = getTimeframeMilliseconds(timeframe);
-
-  // Calculate start time (default: count intervals ago from now)
-  const endTime = startTime ?? Date.now();
-  let currentTime = startTime ?? endTime - count * interval;
-
-  // Get base price and volatility for instrument
-  const basePrice = getBasePrice(instrument.id);
-  const volatility = getVolatility(instrument.type, timeframe);
-
-  // Generate candlesticks
-  const candlesticks: Candlestick[] = [];
-  let currentPrice = basePrice;
-
-  for (let i = 0; i < count; i++) {
-    const candle = generateSingleCandlestick(
-      currentTime,
-      currentPrice,
-      volatility,
-      instrument.precision,
-      random
-    );
-
-    candlesticks.push(candle);
-
-    // Next candle opens at previous close (with small gap/slippage)
-    const slippage = random.range(-0.0001, 0.0001);
-    currentPrice = candle.close * (1 + slippage);
-
-    // Move to next time interval
-    currentTime += interval;
-  }
-
-  return candlesticks;
+  const seed = instrumentSeed + count;
+  return generateCandlesticks(instrumentId, timeframe, count, seed);
 }
 
 /**
- * Generate candlesticks for multiple timeframes
- * Useful for creating consistent data across different chart views
+ * Pre-generated candlestick data for common instruments
+ * Generated on module load for immediate availability
  */
-export function generateMultiTimeframeCandlesticks(
-  config: Omit<CandlestickGeneratorConfig, 'timeframe'>,
-  timeframes: Timeframe[]
-): Record<Timeframe, Candlestick[]> {
-  const result: Record<string, Candlestick[]> = {};
+export const mockCandlesticks = {
+  // Forex pairs - H1 timeframe, 200 candles
+  EUR_USD: generateCandlesticks('FOREX_EUR_USD', 'H1', 200, 1000),
+  GBP_USD: generateCandlesticks('FOREX_GBP_USD', 'H1', 200, 1001),
+  USD_JPY: generateCandlesticks('FOREX_USD_JPY', 'H1', 200, 1002),
+  AUD_USD: generateCandlesticks('FOREX_AUD_USD', 'H1', 200, 1003),
 
-  timeframes.forEach(timeframe => {
-    result[timeframe] = generateCandlesticks({
-      ...config,
-      timeframe,
-    });
-  });
+  // Stocks - H1 timeframe, 200 candles
+  AAPL: generateCandlesticks('STOCK_AAPL', 'H1', 200, 2000),
+  GOOGL: generateCandlesticks('STOCK_GOOGL', 'H1', 200, 2001),
+  MSFT: generateCandlesticks('STOCK_MSFT', 'H1', 200, 2002),
+  TSLA: generateCandlesticks('STOCK_TSLA', 'H1', 200, 2003),
 
-  return result as Record<Timeframe, Candlestick[]>;
+  // Crypto - H1 timeframe, 200 candles
+  BTC: generateCandlesticks('CRYPTO_BTC', 'H1', 200, 3000),
+  ETH: generateCandlesticks('CRYPTO_ETH', 'H1', 200, 3001),
+  SOL: generateCandlesticks('CRYPTO_SOL', 'H1', 200, 3002),
+} as const;
+
+/**
+ * Get candlesticks by instrument symbol
+ * Returns pre-generated data if available, generates on-demand otherwise
+ */
+export function getCandlesticksBySymbol(
+  symbol: string,
+  timeframe: Timeframe = 'H1',
+  count: number = 200
+): Candlestick[] {
+  // Check if we have pre-generated data
+  const key = symbol as keyof typeof mockCandlesticks;
+  if (key in mockCandlesticks) {
+    return mockCandlesticks[key];
+  }
+
+  // Generate on-demand
+  return getCandlesticks(symbol, timeframe, count);
 }
