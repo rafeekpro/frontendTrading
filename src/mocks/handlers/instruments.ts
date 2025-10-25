@@ -11,7 +11,7 @@ import type {
   InstrumentsResponse,
   InstrumentResponse,
   CandlesticksResponse,
-  ErrorResponse
+  ErrorResponse,
 } from '../../types/trading';
 
 /**
@@ -28,7 +28,7 @@ const PLACEHOLDER_INSTRUMENTS: Instrument[] = [
     pip_value: 0.0001,
     min_trade_size: 0.01,
     max_trade_size: 100,
-    precision: 5
+    precision: 5,
   },
   {
     id: 'GBP_USD',
@@ -39,7 +39,7 @@ const PLACEHOLDER_INSTRUMENTS: Instrument[] = [
     pip_value: 0.0001,
     min_trade_size: 0.01,
     max_trade_size: 100,
-    precision: 5
+    precision: 5,
   },
   {
     id: 'USD_JPY',
@@ -50,14 +50,22 @@ const PLACEHOLDER_INSTRUMENTS: Instrument[] = [
     pip_value: 0.01,
     min_trade_size: 0.01,
     max_trade_size: 100,
-    precision: 3
-  }
+    precision: 3,
+  },
 ];
 
 /**
  * Valid timeframes for validation
  */
-const VALID_TIMEFRAMES: Timeframe[] = ['M1', 'M5', 'M15', 'M30', 'H1', 'H4', 'D1'];
+const VALID_TIMEFRAMES: Timeframe[] = [
+  'M1',
+  'M5',
+  'M15',
+  'M30',
+  'H1',
+  'H4',
+  'D1',
+];
 
 /**
  * Generate placeholder candlestick data
@@ -70,7 +78,7 @@ function generatePlaceholderCandlesticks(
 ): Candlestick[] {
   const candlesticks: Candlestick[] = [];
   const now = Date.now();
-  const basePrice = 1.0850; // Placeholder base price
+  const basePrice = 1.085; // Placeholder base price
 
   for (let i = 0; i < count; i++) {
     const timestamp = now - (count - i) * 60000; // 1 minute intervals
@@ -86,7 +94,7 @@ function generatePlaceholderCandlesticks(
       high,
       low,
       close,
-      volume
+      volume,
     });
   }
 
@@ -107,15 +115,15 @@ function createErrorResponse(status: number, error: string, message: string) {
   const errorBody: ErrorResponse = {
     error,
     message,
-    status
+    status,
   };
 
   return HttpResponse.json(errorBody, {
     status,
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    }
+      'Access-Control-Allow-Origin': '*',
+    },
   });
 }
 
@@ -133,13 +141,21 @@ export const instrumentsHandlers = [
     const { id } = params;
 
     if (typeof id !== 'string') {
-      return createErrorResponse(400, 'BAD_REQUEST', 'Invalid instrument ID format');
+      return createErrorResponse(
+        400,
+        'BAD_REQUEST',
+        'Invalid instrument ID format'
+      );
     }
 
     // Validate instrument exists
     const instrument = findInstrument(id);
     if (!instrument) {
-      return createErrorResponse(404, 'NOT_FOUND', `Instrument with ID "${id}" not found`);
+      return createErrorResponse(
+        404,
+        'NOT_FOUND',
+        `Instrument with ID "${id}" not found`
+      );
     }
 
     // Parse and validate timeframe parameter
@@ -163,20 +179,23 @@ export const instrumentsHandlers = [
     }
 
     // Generate placeholder candlestick data
-    const candlesticks = generatePlaceholderCandlesticks(id, timeframe as Timeframe);
+    const candlesticks = generatePlaceholderCandlesticks(
+      id,
+      timeframe as Timeframe
+    );
 
     const response: CandlesticksResponse = {
       candlesticks,
       instrument_id: id,
-      timeframe: timeframe as Timeframe
+      timeframe: timeframe as Timeframe,
     };
 
     return HttpResponse.json(response, {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
+        'Access-Control-Allow-Origin': '*',
+      },
     });
   }),
 
@@ -188,25 +207,33 @@ export const instrumentsHandlers = [
     const { id } = params;
 
     if (typeof id !== 'string') {
-      return createErrorResponse(400, 'BAD_REQUEST', 'Invalid instrument ID format');
+      return createErrorResponse(
+        400,
+        'BAD_REQUEST',
+        'Invalid instrument ID format'
+      );
     }
 
     const instrument = findInstrument(id);
 
     if (!instrument) {
-      return createErrorResponse(404, 'NOT_FOUND', `Instrument with ID "${id}" not found`);
+      return createErrorResponse(
+        404,
+        'NOT_FOUND',
+        `Instrument with ID "${id}" not found`
+      );
     }
 
     const response: InstrumentResponse = {
-      instrument
+      instrument,
     };
 
     return HttpResponse.json(response, {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
+        'Access-Control-Allow-Origin': '*',
+      },
     });
   }),
 
@@ -216,15 +243,15 @@ export const instrumentsHandlers = [
    */
   http.get('*/api/instruments', () => {
     const response: InstrumentsResponse = {
-      instruments: PLACEHOLDER_INSTRUMENTS
+      instruments: PLACEHOLDER_INSTRUMENTS,
     };
 
     return HttpResponse.json(response, {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
+        'Access-Control-Allow-Origin': '*',
+      },
     });
-  })
+  }),
 ];

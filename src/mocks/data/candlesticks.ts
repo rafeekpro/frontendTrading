@@ -5,7 +5,11 @@
  * for financial instruments with deterministic random generation.
  */
 
-import type { Candlestick, CandlestickGeneratorConfig, Timeframe } from '../../types/trading';
+import type {
+  Candlestick,
+  CandlestickGeneratorConfig,
+  Timeframe,
+} from '../../types/trading';
 
 /**
  * Seeded pseudo-random number generator
@@ -128,9 +132,6 @@ function generateSingleCandlestick(
   precision: number,
   random: SeededRandom
 ): Candlestick {
-  // Determine if candle is bullish (close > open) or bearish (close < open)
-  const isBullish = random.next() > 0.5;
-
   // Generate price movement within volatility range
   const priceChange = random.range(-volatility, volatility);
   const close = openPrice * (1 + priceChange);
@@ -152,7 +153,9 @@ function generateSingleCandlestick(
   // Generate volume (higher volume for larger price movements)
   const baseVolume = 10000;
   const volumeMultiplier = 1 + Math.abs(priceChange) * 100;
-  const volume = Math.round(baseVolume * volumeMultiplier * random.range(0.5, 1.5));
+  const volume = Math.round(
+    baseVolume * volumeMultiplier * random.range(0.5, 1.5)
+  );
 
   return {
     timestamp,
@@ -180,7 +183,9 @@ function generateSingleCandlestick(
  * });
  * ```
  */
-export function generateCandlesticks(config: CandlestickGeneratorConfig): Candlestick[] {
+export function generateCandlesticks(
+  config: CandlestickGeneratorConfig
+): Candlestick[] {
   const { instrument, timeframe, count, startTime, seed } = config;
 
   // Initialize seeded random generator

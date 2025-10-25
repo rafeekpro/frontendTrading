@@ -10,7 +10,7 @@ import { instrumentsHandlers } from './instruments';
  * Add new handler arrays here as they are created
  */
 export const handlers = [
-  ...instrumentsHandlers
+  ...instrumentsHandlers,
   // Add more handler arrays here:
   // ...ordersHandlers,
   // ...accountHandlers,

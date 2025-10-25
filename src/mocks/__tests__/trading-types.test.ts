@@ -4,12 +4,25 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import type { Instrument, Candlestick, Timeframe, InstrumentType } from '../../types/trading';
+import type {
+  Instrument,
+  Candlestick,
+  Timeframe,
+  InstrumentType,
+} from '../../types/trading';
 
 describe('Trading Types - Interface Validation', () => {
   describe('Timeframe enum', () => {
     it('should define all required timeframe values', () => {
-      const timeframes: Timeframe[] = ['M1', 'M5', 'M15', 'M30', 'H1', 'H4', 'D1'];
+      const timeframes: Timeframe[] = [
+        'M1',
+        'M5',
+        'M15',
+        'M30',
+        'H1',
+        'H4',
+        'D1',
+      ];
 
       timeframes.forEach(tf => {
         // This will fail if Timeframe type doesn't exist or doesn't include these values
@@ -41,7 +54,7 @@ describe('Trading Types - Interface Validation', () => {
         pip_value: 0.0001,
         min_trade_size: 0.01,
         max_trade_size: 100,
-        precision: 5
+        precision: 5,
       };
 
       expect(instrument.id).toBe('EUR_USD');
@@ -61,7 +74,7 @@ describe('Trading Types - Interface Validation', () => {
         pip_value: 0.0001,
         min_trade_size: 0.01,
         max_trade_size: 100,
-        precision: 4
+        precision: 4,
       };
 
       expect(instrument).toHaveProperty('id');
@@ -77,11 +90,11 @@ describe('Trading Types - Interface Validation', () => {
     it('should validate complete candlestick structure', () => {
       const candlestick: Candlestick = {
         timestamp: 1698249600000,
-        open: 1.0850,
+        open: 1.085,
         high: 1.0865,
         low: 1.0845,
-        close: 1.0860,
-        volume: 12500
+        close: 1.086,
+        volume: 12500,
       };
 
       expect(candlestick.timestamp).toBeGreaterThan(0);
@@ -99,7 +112,7 @@ describe('Trading Types - Interface Validation', () => {
         high: 105,
         low: 95,
         close: 102,
-        volume: 1000
+        volume: 1000,
       };
 
       expect(candlestick).toHaveProperty('timestamp');
@@ -115,9 +128,9 @@ describe('Trading Types - Interface Validation', () => {
         timestamp: Date.now(),
         open: 100,
         high: 110, // high should be >= all others
-        low: 90,   // low should be <= all others
+        low: 90, // low should be <= all others
         close: 105,
-        volume: 500
+        volume: 500,
       };
 
       expect(candlestick.high).toBeGreaterThanOrEqual(candlestick.open);

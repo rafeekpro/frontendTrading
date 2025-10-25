@@ -5,7 +5,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { mockInstruments, getInstrumentById } from '../data/instruments';
-import type { Instrument, InstrumentType } from '../../types/trading';
+import type { Instrument } from '../../types/trading';
 
 describe('Mock Instruments Data', () => {
   describe('mockInstruments array', () => {
@@ -31,7 +31,9 @@ describe('Mock Instruments Data', () => {
       expect(indices.length).toBeGreaterThanOrEqual(3);
 
       const names = indices.map(i => i.name.toLowerCase());
-      expect(names.some(n => n.includes('s&p') || n.includes('500'))).toBe(true);
+      expect(names.some(n => n.includes('s&p') || n.includes('500'))).toBe(
+        true
+      );
       expect(names.some(n => n.includes('nasdaq'))).toBe(true);
       expect(names.some(n => n.includes('dax'))).toBe(true);
     });
@@ -65,7 +67,9 @@ describe('Mock Instruments Data', () => {
         expect(['forex', 'index', 'commodity']).toContain(instrument.type);
 
         // Max should be greater than min
-        expect(instrument.max_trade_size).toBeGreaterThan(instrument.min_trade_size);
+        expect(instrument.max_trade_size).toBeGreaterThan(
+          instrument.min_trade_size
+        );
       });
     });
 

@@ -6,7 +6,12 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
 import { setupServer } from 'msw/node';
 import { instrumentsHandlers } from '../handlers/instruments';
-import type { InstrumentsResponse, InstrumentResponse, CandlesticksResponse } from '../../types/trading';
+import type {
+  InstrumentsResponse,
+  InstrumentResponse,
+  CandlesticksResponse,
+  ErrorResponse,
+} from '../../types/trading';
 
 // Setup MSW test server
 const server = setupServer(...instrumentsHandlers);
@@ -24,10 +29,12 @@ describe('Instruments API Handlers', () => {
   describe('GET /api/instruments', () => {
     it('should return list of all instruments', async () => {
       const response = await fetch('http://localhost/api/instruments');
-      const data = await response.json() as InstrumentsResponse;
+      const data = (await response.json()) as InstrumentsResponse;
 
       expect(response.status).toBe(200);
-      expect(response.headers.get('content-type')).toContain('application/json');
+      expect(response.headers.get('content-type')).toContain(
+        'application/json'
+      );
       expect(data).toHaveProperty('instruments');
       expect(Array.isArray(data.instruments)).toBe(true);
       expect(data.instruments.length).toBeGreaterThan(0);
@@ -35,7 +42,7 @@ describe('Instruments API Handlers', () => {
 
     it('should return instruments with correct structure', async () => {
       const response = await fetch('http://localhost/api/instruments');
-      const data = await response.json() as InstrumentsResponse;
+      const data = (await response.json()) as InstrumentsResponse;
 
       const instrument = data.instruments[0];
       expect(instrument).toHaveProperty('id');
@@ -51,7 +58,7 @@ describe('Instruments API Handlers', () => {
 
     it('should include major forex pairs', async () => {
       const response = await fetch('http://localhost/api/instruments');
-      const data = await response.json() as InstrumentsResponse;
+      const data = (await response.json()) as InstrumentsResponse;
 
       const symbols = data.instruments.map(i => i.symbol);
       expect(symbols).toContain('EUR/USD');
@@ -63,7 +70,7 @@ describe('Instruments API Handlers', () => {
   describe('GET /api/instruments/:id', () => {
     it('should return single instrument by ID', async () => {
       const response = await fetch('http://localhost/api/instruments/EUR_USD');
-      const data = await response.json() as InstrumentResponse;
+      const data = (await response.json()) as InstrumentResponse;
 
       expect(response.status).toBe(200);
       expect(data).toHaveProperty('instrument');
@@ -72,16 +79,20 @@ describe('Instruments API Handlers', () => {
     });
 
     it('should return 404 for non-existent instrument', async () => {
-      const response = await fetch('http://localhost/api/instruments/INVALID_ID');
+      const response = await fetch(
+        'http://localhost/api/instruments/INVALID_ID'
+      );
 
       expect(response.status).toBe(404);
-      const data = await response.json();
+      const data = (await response.json()) as ErrorResponse;
       expect(data).toHaveProperty('error');
     });
 
     it('should return proper error message for invalid ID', async () => {
-      const response = await fetch('http://localhost/api/instruments/DOES_NOT_EXIST');
-      const data = await response.json();
+      const response = await fetch(
+        'http://localhost/api/instruments/DOES_NOT_EXIST'
+      );
+      const data = (await response.json()) as ErrorResponse;
 
       expect(response.status).toBe(404);
       expect(data.error).toBeDefined();
@@ -91,8 +102,10 @@ describe('Instruments API Handlers', () => {
 
   describe('GET /api/instruments/:id/candlesticks', () => {
     it('should return candlestick data for valid instrument', async () => {
-      const response = await fetch('http://localhost/api/instruments/EUR_USD/candlesticks?timeframe=H1');
-      const data = await response.json() as CandlesticksResponse;
+      const response = await fetch(
+        'http://localhost/api/instruments/EUR_USD/candlesticks?timeframe=H1'
+      );
+      const data = (await response.json()) as CandlesticksResponse;
 
       expect(response.status).toBe(200);
       expect(data).toHaveProperty('candlesticks');
@@ -103,8 +116,10 @@ describe('Instruments API Handlers', () => {
     });
 
     it('should return candlesticks with OHLCV structure', async () => {
-      const response = await fetch('http://localhost/api/instruments/EUR_USD/candlesticks?timeframe=M5');
-      const data = await response.json() as CandlesticksResponse;
+      const response = await fetch(
+        'http://localhost/api/instruments/EUR_USD/candlesticks?timeframe=M5'
+      );
+      const data = (await response.json()) as CandlesticksResponse;
 
       expect(Array.isArray(data.candlesticks)).toBe(true);
       expect(data.candlesticks.length).toBeGreaterThan(0);
@@ -119,8 +134,10 @@ describe('Instruments API Handlers', () => {
     });
 
     it('should validate OHLC relationships', async () => {
-      const response = await fetch('http://localhost/api/instruments/EUR_USD/candlesticks?timeframe=D1');
-      const data = await response.json() as CandlesticksResponse;
+      const response = await fetch(
+        'http://localhost/api/instruments/EUR_USD/candlesticks?timeframe=D1'
+      );
+      const data = (await response.json()) as CandlesticksResponse;
 
       data.candlesticks.forEach(candle => {
         expect(candle.high).toBeGreaterThanOrEqual(candle.open);
@@ -135,33 +152,41 @@ describe('Instruments API Handlers', () => {
       const timeframes = ['M1', 'M5', 'M15', 'M30', 'H1', 'H4', 'D1'];
 
       for (const timeframe of timeframes) {
-        const response = await fetch(`http://localhost/api/instruments/EUR_USD/candlesticks?timeframe=${timeframe}`);
+        const response = await fetch(
+          `http://localhost/api/instruments/EUR_USD/candlesticks?timeframe=${timeframe}`
+        );
         expect(response.status).toBe(200);
 
-        const data = await response.json() as CandlesticksResponse;
+        const data = (await response.json()) as CandlesticksResponse;
         expect(data.timeframe).toBe(timeframe);
       }
     });
 
     it('should return 400 for invalid timeframe', async () => {
-      const response = await fetch('http://localhost/api/instruments/EUR_USD/candlesticks?timeframe=INVALID');
+      const response = await fetch(
+        'http://localhost/api/instruments/EUR_USD/candlesticks?timeframe=INVALID'
+      );
 
       expect(response.status).toBe(400);
-      const data = await response.json();
+      const data = (await response.json()) as ErrorResponse;
       expect(data).toHaveProperty('error');
       expect(data.message).toContain('timeframe');
     });
 
     it('should return 400 for missing timeframe parameter', async () => {
-      const response = await fetch('http://localhost/api/instruments/EUR_USD/candlesticks');
+      const response = await fetch(
+        'http://localhost/api/instruments/EUR_USD/candlesticks'
+      );
 
       expect(response.status).toBe(400);
-      const data = await response.json();
+      const data = (await response.json()) as ErrorResponse;
       expect(data).toHaveProperty('error');
     });
 
     it('should return 404 for non-existent instrument', async () => {
-      const response = await fetch('http://localhost/api/instruments/INVALID_ID/candlesticks?timeframe=H1');
+      const response = await fetch(
+        'http://localhost/api/instruments/INVALID_ID/candlesticks?timeframe=H1'
+      );
 
       expect(response.status).toBe(404);
     });
@@ -178,12 +203,14 @@ describe('Instruments API Handlers', () => {
       const endpoints = [
         '/api/instruments',
         '/api/instruments/EUR_USD',
-        '/api/instruments/EUR_USD/candlesticks?timeframe=H1'
+        '/api/instruments/EUR_USD/candlesticks?timeframe=H1',
       ];
 
       for (const endpoint of endpoints) {
         const response = await fetch(`http://localhost${endpoint}`);
-        expect(response.headers.get('content-type')).toContain('application/json');
+        expect(response.headers.get('content-type')).toContain(
+          'application/json'
+        );
       }
     });
   });

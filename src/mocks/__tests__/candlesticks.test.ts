@@ -4,12 +4,16 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { generateCandlesticks, getTimeframeMilliseconds } from '../data/candlesticks';
+import {
+  generateCandlesticks,
+  getTimeframeMilliseconds,
+} from '../data/candlesticks';
 import { mockInstruments } from '../data/instruments';
 import type { Timeframe } from '../../types/trading';
 
 describe('Candlestick Data Generator', () => {
-  const eurUsd = mockInstruments.find(i => i.id === 'EUR_USD')!;
+  const eurUsd = mockInstruments.find(i => i.id === 'EUR_USD');
+  if (!eurUsd) throw new Error('EUR_USD instrument not found');
 
   describe('getTimeframeMilliseconds', () => {
     it('should return correct milliseconds for each timeframe', () => {
@@ -90,7 +94,8 @@ describe('Candlestick Data Generator', () => {
       const expectedInterval = 60 * 60 * 1000; // 1 hour
 
       for (let i = 1; i < candlesticks.length; i++) {
-        const timeDiff = candlesticks[i].timestamp - candlesticks[i - 1].timestamp;
+        const timeDiff =
+          candlesticks[i].timestamp - candlesticks[i - 1].timestamp;
         expect(timeDiff).toBe(expectedInterval);
       }
     });
@@ -194,15 +199,29 @@ describe('Candlestick Data Generator', () => {
           return decimalIndex === -1 ? 0 : str.length - decimalIndex - 1;
         };
 
-        expect(countDecimals(candle.open)).toBeLessThanOrEqual(eurUsd.precision);
-        expect(countDecimals(candle.high)).toBeLessThanOrEqual(eurUsd.precision);
+        expect(countDecimals(candle.open)).toBeLessThanOrEqual(
+          eurUsd.precision
+        );
+        expect(countDecimals(candle.high)).toBeLessThanOrEqual(
+          eurUsd.precision
+        );
         expect(countDecimals(candle.low)).toBeLessThanOrEqual(eurUsd.precision);
-        expect(countDecimals(candle.close)).toBeLessThanOrEqual(eurUsd.precision);
+        expect(countDecimals(candle.close)).toBeLessThanOrEqual(
+          eurUsd.precision
+        );
       });
     });
 
     it('should work with different timeframes', () => {
-      const timeframes: Timeframe[] = ['M1', 'M5', 'M15', 'M30', 'H1', 'H4', 'D1'];
+      const timeframes: Timeframe[] = [
+        'M1',
+        'M5',
+        'M15',
+        'M30',
+        'H1',
+        'H4',
+        'D1',
+      ];
 
       timeframes.forEach(timeframe => {
         const candlesticks = generateCandlesticks({
@@ -216,7 +235,8 @@ describe('Candlestick Data Generator', () => {
         // Verify timestamp intervals match timeframe
         const expectedInterval = getTimeframeMilliseconds(timeframe);
         for (let i = 1; i < candlesticks.length; i++) {
-          const timeDiff = candlesticks[i].timestamp - candlesticks[i - 1].timestamp;
+          const timeDiff =
+            candlesticks[i].timestamp - candlesticks[i - 1].timestamp;
           expect(timeDiff).toBe(expectedInterval);
         }
       });
