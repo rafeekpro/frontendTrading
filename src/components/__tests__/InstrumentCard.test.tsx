@@ -212,7 +212,7 @@ describe('InstrumentCard', () => {
         />
       );
 
-      const card = screen.getByRole('button', { name: /EUR\/USD/i });
+      const card = screen.getByRole('button', { name: /View details for EUR\/USD/i });
       await user.click(card);
 
       expect(onNavigate).toHaveBeenCalledWith('EUR_USD');
@@ -371,7 +371,7 @@ describe('InstrumentCard', () => {
         />
       );
 
-      const card = screen.getByRole('button', { name: /EUR\/USD/i });
+      const card = screen.getByRole('button', { name: /View details for EUR\/USD/i });
       expect(card).toBeInTheDocument();
     });
 
@@ -404,7 +404,7 @@ describe('InstrumentCard', () => {
         />
       );
 
-      const card = screen.getByRole('button', { name: /EUR\/USD/i });
+      const card = screen.getByRole('button', { name: /View details for EUR\/USD/i });
       card.focus();
       await user.keyboard('{Enter}');
 
