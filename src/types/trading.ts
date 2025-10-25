@@ -260,3 +260,60 @@ export interface OpportunitiesResponse {
 export interface OpportunityResponse {
   opportunity: Opportunity;
 }
+
+/**
+ * Order Book Entry
+ * Represents a single price level in the order book
+ */
+export interface OrderBookEntry {
+  /** Price level */
+  price: number;
+
+  /** Volume at this price level */
+  volume: number;
+
+  /** Cumulative volume (depth) */
+  total: number;
+}
+
+/**
+ * Order Book Data
+ * Represents the current state of bids and asks
+ */
+export interface OrderBook {
+  /** Array of bid orders (buy orders), sorted by price descending */
+  bids: OrderBookEntry[];
+
+  /** Array of ask orders (sell orders), sorted by price ascending */
+  asks: OrderBookEntry[];
+
+  /** Spread between best bid and best ask */
+  spread: number;
+
+  /** Unix timestamp in milliseconds */
+  timestamp: number;
+}
+
+/**
+ * Market Statistics
+ * Represents 24-hour market statistics
+ */
+export interface MarketStats {
+  /** 24-hour high price */
+  high24h: number;
+
+  /** 24-hour low price */
+  low24h: number;
+
+  /** 24-hour trading volume */
+  volume24h: number;
+
+  /** Volume Weighted Average Price */
+  vwap: number;
+
+  /** Open Interest (optional, for derivatives) */
+  openInterest?: number;
+
+  /** Unix timestamp in milliseconds */
+  timestamp: number;
+}
