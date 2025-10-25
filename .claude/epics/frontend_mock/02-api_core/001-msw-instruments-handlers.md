@@ -2,11 +2,12 @@
 task_id: frontend_mock/02-api_core/001
 title: MSW handlers for instruments API
 epic: frontend_mock/02-api_core
-status: pending
+status: completed
 priority: high
 effort_hours: 4
 created: 2025-10-25T17:11:34Z
-updated: 2025-10-25T17:11:34Z
+updated: 2025-10-25T19:36:22Z
+github: https://github.com/rafeekpro/frontendTrading/issues/7
 depends_on: []
 parallel: true
 tags: [msw, api-mocking, instruments, frontend]
