@@ -46,22 +46,32 @@ export function SearchBar({
   onChange,
   placeholder = 'Search instruments...',
 }: SearchBarProps) {
+  // Use local state for immediate UI updates
   const [localValue, setLocalValue] = useState(value);
+  // Debounce the value before calling onChange
+  const debouncedValue = useDebounce(localValue, 300);
 
   // Sync external value changes to local state
   useEffect(() => {
     setLocalValue(value);
   }, [value]);
 
+  // Call onChange when debounced value changes
+  useEffect(() => {
+    if (debouncedValue !== value) {
+      onChange(debouncedValue);
+    }
+  }, [debouncedValue, onChange, value]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setLocalValue(newValue);
-    onChange(newValue);
+    // onChange will be called automatically after debounce via useEffect
   };
 
   const handleClear = () => {
     setLocalValue('');
-    onChange('');
+    onChange(''); // Call immediately for clear action
   };
 
   return (
