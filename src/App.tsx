@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
 
   return (
     <div className="App">
@@ -9,7 +9,7 @@ function App() {
         <h1>Frontend Trading Application</h1>
         <p>React 19 + TypeScript + Vite</p>
         <div className="card">
-          <button onClick={() => setCount((count) => count + 1)}>
+          <button onClick={() => setCount(count => count + 1)}>
             count is {count}
           </button>
         </div>
@@ -18,7 +18,7 @@ function App() {
         </p>
       </header>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

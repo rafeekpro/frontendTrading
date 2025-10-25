@@ -2,7 +2,7 @@
 # Validation test for ESLint and Prettier configuration
 # This test MUST FAIL initially (RED phase) before implementation
 
-set -e
+set +e  # Don't exit on errors - we need to count all failures
 
 echo "==================================="
 echo "Linting Configuration Validation"
@@ -43,20 +43,20 @@ check_package_script() {
 }
 
 check_eslint_config() {
-    if [ -f ".eslintrc.cjs" ]; then
-        if grep -q "typescript-eslint" .eslintrc.cjs; then
-            echo "✅ .eslintrc.cjs has TypeScript parser"
+    if [ -f "eslint.config.js" ]; then
+        if grep -q "typescript-eslint" eslint.config.js; then
+            echo "✅ eslint.config.js has TypeScript parser"
             ((PASSED++))
         else
-            echo "❌ .eslintrc.cjs missing TypeScript parser"
+            echo "❌ eslint.config.js missing TypeScript parser"
             ((FAILED++))
         fi
 
-        if grep -q "plugin:react" .eslintrc.cjs; then
-            echo "✅ .eslintrc.cjs has React plugin"
+        if grep -q "react-hooks" eslint.config.js; then
+            echo "✅ eslint.config.js has React hooks plugin"
             ((PASSED++))
         else
-            echo "❌ .eslintrc.cjs missing React plugin"
+            echo "❌ eslint.config.js missing React hooks plugin"
             ((FAILED++))
         fi
     fi
@@ -75,7 +75,7 @@ check_prettier_config() {
 }
 
 echo "📦 Checking configuration files..."
-check_file ".eslintrc.cjs"
+check_file "eslint.config.js"
 check_file ".prettierrc"
 
 echo ""
