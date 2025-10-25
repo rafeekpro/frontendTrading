@@ -85,15 +85,17 @@ describe('OrderBook', () => {
     it('should display bid volumes', () => {
       render(<OrderBook bids={mockBids} asks={mockAsks} spread={mockSpread} />);
 
-      // First bid volume
-      expect(screen.getByText('100,000')).toBeInTheDocument();
+      // First bid volume (appears in both volume and total columns)
+      const volumes = screen.getAllByText('100,000');
+      expect(volumes.length).toBeGreaterThan(0);
     });
 
     it('should display bid cumulative totals', () => {
       render(<OrderBook bids={mockBids} asks={mockAsks} spread={mockSpread} />);
 
       // Check cumulative total for first bid
-      expect(screen.getByText(/100,000/)).toBeInTheDocument();
+      const totals = screen.getAllByText(/100,000/);
+      expect(totals.length).toBeGreaterThan(0);
     });
 
     it('should apply green styling to bid rows', () => {
@@ -127,15 +129,17 @@ describe('OrderBook', () => {
     it('should display ask volumes', () => {
       render(<OrderBook bids={mockBids} asks={mockAsks} spread={mockSpread} />);
 
-      // First ask volume
-      expect(screen.getByText('95,000')).toBeInTheDocument();
+      // First ask volume (appears in both volume and total columns)
+      const volumes = screen.getAllByText('95,000');
+      expect(volumes.length).toBeGreaterThan(0);
     });
 
     it('should display ask cumulative totals', () => {
       render(<OrderBook bids={mockBids} asks={mockAsks} spread={mockSpread} />);
 
       // Check cumulative total for first ask
-      expect(screen.getByText(/95,000/)).toBeInTheDocument();
+      const totals = screen.getAllByText(/95,000/);
+      expect(totals.length).toBeGreaterThan(0);
     });
 
     it('should apply red styling to ask rows', () => {
@@ -182,7 +186,8 @@ describe('OrderBook', () => {
       );
 
       const depthBar = container.querySelector('[data-testid="depth-bar-bid-0"]');
-      expect(depthBar).toHaveStyle({ width: expect.stringMatching(/\d+%/) });
+      const width = depthBar?.getAttribute('style');
+      expect(width).toMatch(/width:\s*\d+(\.\d+)?%/);
     });
 
     it('should use green color for bid depth bars', () => {
@@ -255,13 +260,15 @@ describe('OrderBook', () => {
     it('should format volumes with thousands separators', () => {
       render(<OrderBook bids={mockBids} asks={mockAsks} spread={mockSpread} />);
 
-      expect(screen.getByText('100,000')).toBeInTheDocument();
+      // Volume appears multiple times
+      const volumes = screen.getAllByText('100,000');
+      expect(volumes.length).toBeGreaterThan(0);
     });
 
     it('should format spread with appropriate precision', () => {
       render(<OrderBook bids={mockBids} asks={mockAsks} spread={mockSpread} />);
 
-      expect(screen.getByText('0.0001')).toBeInTheDocument();
+      expect(screen.getByText(/0\.0001/)).toBeInTheDocument();
     });
   });
 

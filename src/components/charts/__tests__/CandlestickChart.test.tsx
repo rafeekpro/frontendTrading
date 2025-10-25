@@ -62,12 +62,15 @@ const mockCandlesticks: Candlestick[] = [
 
 describe('CandlestickChart', () => {
   beforeEach(() => {
-    // Mock ResizeObserver
-    global.ResizeObserver = vi.fn().mockImplementation(() => ({
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
-    }));
+    // Mock ResizeObserver using class syntax
+    global.ResizeObserver = class ResizeObserver {
+      observe = vi.fn();
+      unobserve = vi.fn();
+      disconnect = vi.fn();
+      constructor() {
+        // Empty constructor
+      }
+    } as never;
   });
 
   afterEach(() => {
@@ -523,11 +526,14 @@ describe('CandlestickChart', () => {
 
     it('should cleanup ResizeObserver on unmount', async () => {
       const mockDisconnect = vi.fn();
-      global.ResizeObserver = vi.fn().mockImplementation(() => ({
-        observe: vi.fn(),
-        unobserve: vi.fn(),
-        disconnect: mockDisconnect,
-      }));
+      global.ResizeObserver = class ResizeObserver {
+        observe = vi.fn();
+        unobserve = vi.fn();
+        disconnect = mockDisconnect;
+        constructor() {
+          // Empty constructor
+        }
+      } as never;
 
       const { unmount } = render(
         <CandlestickChart
