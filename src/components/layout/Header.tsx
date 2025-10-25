@@ -11,6 +11,12 @@ interface HeaderProps {
   onMenuClick?: () => void;
 }
 
+const PROFILE_MENU_ITEMS = [
+  { label: 'My Account', action: 'account' },
+  { label: 'Settings', action: 'settings' },
+  { label: 'Logout', action: 'logout' },
+] as const;
+
 export function Header({ onMenuClick }: HeaderProps) {
   return (
     <header
@@ -67,15 +73,11 @@ export function Header({ onMenuClick }: HeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" role="menu">
-            <DropdownMenuItem role="menuitem">
-              My Account
-            </DropdownMenuItem>
-            <DropdownMenuItem role="menuitem">
-              Settings
-            </DropdownMenuItem>
-            <DropdownMenuItem role="menuitem">
-              Logout
-            </DropdownMenuItem>
+            {PROFILE_MENU_ITEMS.map((item) => (
+              <DropdownMenuItem key={item.action} role="menuitem">
+                {item.label}
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
