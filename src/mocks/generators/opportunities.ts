@@ -50,8 +50,10 @@ export function generateOpportunities(
   const oneDayAgo = now - 24 * 60 * 60 * 1000;
 
   for (let i = 0; i < count; i++) {
-    // Generate timestamp within past 24 hours
-    const detectedAt = Math.floor(rng.nextFloat(oneDayAgo, now));
+    // Generate timestamp within past 24 hours (use integer arithmetic)
+    const timeRange = Math.floor(now - oneDayAgo);
+    const randomTime = rng.nextInt(0, timeRange);
+    const detectedAt = Math.floor(oneDayAgo) + randomTime;
 
     // Select random instrument
     const instrumentId = rng.choice(instrumentIds);

@@ -39,8 +39,10 @@ export function generatePositions(
   const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
 
   for (let i = 0; i < count; i++) {
-    // Generate timestamp within past 7 days
-    const openedAt = Math.floor(rng.nextFloat(sevenDaysAgo, now));
+    // Generate timestamp within past 7 days (use integer arithmetic)
+    const timeRange = Math.floor(now - sevenDaysAgo);
+    const randomTime = rng.nextInt(0, timeRange);
+    const openedAt = Math.floor(sevenDaysAgo) + randomTime;
 
     // Select random instrument
     const instrumentId = rng.choice(instrumentIds);
