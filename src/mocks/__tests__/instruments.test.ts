@@ -73,12 +73,19 @@ describe('Mock Instruments Data', () => {
       const forexPairs = mockInstruments.filter(i => i.type === 'forex');
 
       forexPairs.forEach(pair => {
-        // Spreads should be in reasonable range (0.00001 to 0.001 for forex)
+        // Spreads should be in reasonable range
         expect(pair.spread).toBeGreaterThan(0.000001);
-        expect(pair.spread).toBeLessThan(0.01);
+
+        // JPY pairs have different spread ranges (0.01-0.05)
+        // Other pairs have spreads in range (0.00001 to 0.001)
+        if (pair.symbol.includes('JPY')) {
+          expect(pair.spread).toBeLessThan(0.05);
+        } else {
+          expect(pair.spread).toBeLessThan(0.001);
+        }
 
         // Major pairs should have tighter spreads
-        const majorPairs = ['EUR/USD', 'GBP/USD', 'USD/JPY'];
+        const majorPairs = ['EUR/USD', 'GBP/USD', 'AUD/USD'];
         if (majorPairs.includes(pair.symbol)) {
           expect(pair.spread).toBeLessThan(0.0003); // Less than 3 pips
         }
