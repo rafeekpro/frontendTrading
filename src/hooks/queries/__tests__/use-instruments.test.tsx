@@ -5,9 +5,21 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { describe, it, expect, beforeEach } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  afterEach,
+} from 'vitest';
+import { setupServer } from 'msw/node';
 import { useInstruments } from '../use-instruments';
+import { instrumentsHandlers } from '../../../mocks/handlers/instruments';
 import type { PropsWithChildren } from 'react';
+
+// Setup MSW test server
+const server = setupServer(...instrumentsHandlers);
 
 /**
  * Test wrapper with fresh QueryClient
@@ -28,9 +40,14 @@ function createWrapper() {
 }
 
 describe('useInstruments', () => {
-  beforeEach(() => {
-    // Clean up before each test
-  });
+  // Start MSW server before all tests
+  beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+
+  // Reset handlers after each test
+  afterEach(() => server.resetHandlers());
+
+  // Clean up after all tests
+  afterAll(() => server.close());
 
   it('should start in loading state', () => {
     const { result } = renderHook(() => useInstruments(), {
