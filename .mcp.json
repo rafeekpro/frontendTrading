@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "env": {
+        "DEFAULT_MINIMUM_TOKENS": "${DEFAULT_MINIMUM_TOKENS:-10000}"
+      }
+    },
+    "playwright-mcp": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp"
+      ],
+      "env": {
+        "PLAYWRIGHT_BROWSER": "${PLAYWRIGHT_BROWSER:-chromium}",
+        "PLAYWRIGHT_HEADLESS": "${PLAYWRIGHT_HEADLESS:-true}"
+      },
+      "envFile": ".claude/.env"
+    }
+  }
+}

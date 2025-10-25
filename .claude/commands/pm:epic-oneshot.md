@@ -1,0 +1,119 @@
+---
+allowed-tools: Read, LS
+---
+
+# Epic Oneshot
+
+Decompose epic into tasks and sync to GitHub in one operation.
+
+## Usage
+```
+/pm:epic-oneshot <feature_name>
+```
+
+## ⚠️ TDD REMINDER
+
+**CRITICAL: All tasks generated will include TDD requirements.**
+
+This command will create tasks that REQUIRE Test-Driven Development:
+- Each task includes TDD Requirements section
+- Definition of Done starts with "Tests written FIRST"
+- All agents must follow RED-GREEN-REFACTOR cycle
+
+See `.claude/rules/tdd.enforcement.md` for complete requirements.
+
+---
+
+## Required Documentation Access
+
+**MANDATORY:** Before project management workflows, query Context7 for best practices:
+
+**Documentation Queries:**
+- `mcp://context7/agile/epic-management` - epic management best practices
+- `mcp://context7/project-management/issue-tracking` - issue tracking best practices
+- `mcp://context7/agile/task-breakdown` - task breakdown best practices
+- `mcp://context7/project-management/workflow` - workflow best practices
+
+**Why This is Required:**
+- Ensures adherence to current industry standards and best practices
+- Prevents outdated or incorrect implementation patterns
+- Provides access to latest framework/tool documentation
+- Reduces errors from stale knowledge or assumptions
+
+
+## Instructions
+
+### 1. Validate Prerequisites
+
+Check that epic exists and hasn't been processed:
+```bash
+# Epic must exist
+test -f .claude/epics/$ARGUMENTS/epic.md || echo "❌ Epic not found. Run: /pm:prd-parse $ARGUMENTS"
+
+# Check for existing tasks
+if ls .claude/epics/$ARGUMENTS/[0-9]*.md 2>/dev/null | grep -q .; then
+  echo "⚠️ Tasks already exist. This will create duplicates."
+  echo "Delete existing tasks or use /pm:epic-sync instead."
+  exit 1
+fi
+
+# Check if already synced
+if grep -q "github:" .claude/epics/$ARGUMENTS/epic.md; then
+  echo "⚠️ Epic already synced to GitHub."
+  echo "Use /pm:epic-sync to update."
+  exit 1
+fi
+```
+
+### 2. Execute Decompose
+
+Simply run the decompose command:
+```
+Running: /pm:epic-decompose $ARGUMENTS
+```
+
+This will:
+- Read the epic
+- Create task files (using parallel agents if appropriate)
+- Update epic with task summary
+
+### 3. Execute Sync
+
+Immediately follow with sync:
+```
+Running: /pm:epic-sync $ARGUMENTS
+```
+
+This will:
+- Create epic issue on GitHub
+- Create sub-issues (using parallel agents if appropriate)
+- Rename task files to issue IDs
+- Create epic branch
+
+### 4. Output
+
+```
+🚀 Epic Oneshot Complete: $ARGUMENTS
+
+Step 1: Decomposition ✓
+  - Tasks created: {count}
+  
+Step 2: GitHub Sync ✓
+  - Epic: #{number}
+  - Sub-issues created: {count}
+  - Branch: epic/$ARGUMENTS
+
+Ready for development!
+  Start work: /pm:epic-start $ARGUMENTS
+  Or single task: /pm:issue-start {task_number}
+```
+
+## Important Notes
+
+This is simply a convenience wrapper that runs:
+1. `/pm:epic-decompose` 
+2. `/pm:epic-sync`
+
+Both commands handle their own error checking, parallel execution, and validation. This command just orchestrates them in sequence.
+
+Use this when you're confident the epic is ready and want to go from epic to GitHub issues in one step.

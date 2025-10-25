@@ -1,0 +1,149 @@
+---
+feature: frontend_mock
+created: '2025-10-25T17:08:08.175Z'
+total_epics: 9
+epics:
+  - number: 1
+    key: infrastructure
+    name: Infrastructure Foundation
+    priority: P0
+    weeks: 1
+    type: infrastructure
+  - number: 2
+    key: api_core
+    name: API Core Services
+    priority: P0
+    weeks: 2
+    type: backend
+  - number: 3
+    key: frontend_foundation
+    name: Frontend Foundation
+    priority: P0
+    weeks: 1
+    type: frontend
+  - number: 4
+    key: auth_backend
+    name: Authentication Backend
+    priority: P0
+    weeks: 2
+    type: backend
+  - number: 5
+    key: data_layer
+    name: Data Layer & Persistence
+    priority: P0
+    weeks: 1
+    type: backend
+  - number: 6
+    key: security
+    name: Security & Compliance
+    priority: P0
+    weeks: 1
+    type: security
+  - number: 7
+    key: dashboard
+    name: Dashboard & User Experience
+    priority: P1
+    weeks: 2
+    type: frontend
+  - number: 8
+    key: deployment
+    name: Deployment & DevOps
+    priority: P1
+    weeks: 1
+    type: devops
+  - number: 9
+    key: testing
+    name: Testing & Quality
+    priority: P1
+    weeks: 1
+    type: testing
+total_weeks: 12
+execution_strategy: parallel_where_possible
+---
+
+# Multi-Epic Structure: frontend_mock
+
+## Overview
+This feature has been automatically split into 9 epics based on PRD analysis.
+
+## Epic Breakdown
+
+### Epic 1: Infrastructure Foundation
+- **Priority:** P0
+- **Duration:** 1 week
+- **Type:** infrastructure
+- **Confidence:** 71%
+
+### Epic 2: API Core Services
+- **Priority:** P0
+- **Duration:** 2 weeks
+- **Type:** backend
+- **Confidence:** 83%
+
+### Epic 3: Frontend Foundation
+- **Priority:** P0
+- **Duration:** 1 week
+- **Type:** frontend
+- **Confidence:** 71%
+
+### Epic 4: Authentication Backend
+- **Priority:** P0
+- **Duration:** 2 weeks
+- **Type:** backend
+- **Confidence:** 57%
+
+### Epic 5: Data Layer & Persistence
+- **Priority:** P0
+- **Duration:** 1 week
+- **Type:** backend
+- **Confidence:** 33%
+
+### Epic 6: Security & Compliance
+- **Priority:** P0
+- **Duration:** 1 week
+- **Type:** security
+- **Confidence:** 33%
+
+### Epic 7: Dashboard & User Experience
+- **Priority:** P1
+- **Duration:** 2 weeks
+- **Type:** frontend
+- **Confidence:** 50%
+
+### Epic 8: Deployment & DevOps
+- **Priority:** P1
+- **Duration:** 1 week
+- **Type:** devops
+- **Confidence:** 60%
+
+### Epic 9: Testing & Quality
+- **Priority:** P1
+- **Duration:** 1 week
+- **Type:** testing
+- **Confidence:** 33%
+
+
+## Execution Timeline
+
+```
+Week 1-1: Infrastructure Foundation
+Week 2-3: API Core Services
+Week 4-4: Frontend Foundation
+Week 5-6: Authentication Backend
+Week 7-7: Data Layer & Persistence
+Week 8-8: Security & Compliance
+Week 9-10: Dashboard & User Experience
+Week 11-11: Deployment & DevOps
+Week 12-12: Testing & Quality
+```
+
+## Total Estimated Effort
+**12 weeks**
+
+## Next Steps
+1. Review and adjust epic breakdown
+2. Decompose each epic into tasks: `/pm:epic-decompose <feature>/<epic_number>`
+3. Sync to GitHub: `/pm:epic-sync <feature>`
+
+---
+*Generated on 2025-10-25T17:08:08.175Z by Epic Split System*
