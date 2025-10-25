@@ -10,6 +10,42 @@ import { SeededRandom } from './seed';
 import type { Instrument, InstrumentType } from '../../types/trading';
 
 /**
+ * Instrument generation constants
+ */
+const INSTRUMENT_DEFAULTS = {
+  stock: {
+    spread: { min: 0.0001, max: 0.001 },
+    pip_value: 0.01,
+    min_trade_size: 1,
+    max_trade_size: 10000,
+    precision: 2,
+  },
+  crypto: {
+    spread: { min: 0.001, max: 0.01 },
+    pip_value: 0.00000001,
+    min_trade_size: 0.001,
+    max_trade_size: 1000,
+    precision: 8,
+  },
+  forex: {
+    spread: { min: 0.00001, max: 0.0001 },
+    pip_value: 0.0001,
+    min_trade_size: 0.01,
+    max_trade_size: 100,
+    precision: 5,
+  },
+} as const;
+
+/**
+ * Distribution ratios for instrument types
+ */
+const DISTRIBUTION_RATIOS = {
+  stock: 0.5, // 50% stocks
+  crypto: 0.25, // 25% crypto
+  forex: 0.25, // 25% forex
+} as const;
+
+/**
  * Popular stock ticker symbols
  */
 const STOCK_TICKERS = [
@@ -134,6 +170,7 @@ function generateStock(ticker: string, seed: number): Instrument {
   faker.seed(seed);
   const rng = new SeededRandom(seed);
 
+  const defaults = INSTRUMENT_DEFAULTS.stock;
   const companyName = faker.company.name();
 
   return {
@@ -141,11 +178,11 @@ function generateStock(ticker: string, seed: number): Instrument {
     name: companyName,
     symbol: ticker,
     type: 'stock',
-    spread: rng.nextFloat(0.0001, 0.001), // 0.01% - 0.1%
-    pip_value: 0.01,
-    min_trade_size: 1,
-    max_trade_size: 10000,
-    precision: 2,
+    spread: rng.nextFloat(defaults.spread.min, defaults.spread.max),
+    pip_value: defaults.pip_value,
+    min_trade_size: defaults.min_trade_size,
+    max_trade_size: defaults.max_trade_size,
+    precision: defaults.precision,
   };
 }
 
@@ -155,6 +192,7 @@ function generateStock(ticker: string, seed: number): Instrument {
 function generateCrypto(symbol: string, seed: number): Instrument {
   const rng = new SeededRandom(seed);
 
+  const defaults = INSTRUMENT_DEFAULTS.crypto;
   const name = CRYPTO_NAMES[symbol] || symbol;
 
   return {
@@ -162,11 +200,11 @@ function generateCrypto(symbol: string, seed: number): Instrument {
     name: name,
     symbol: `${symbol}/USD`,
     type: 'crypto',
-    spread: rng.nextFloat(0.001, 0.01), // 0.1% - 1%
-    pip_value: 0.00000001,
-    min_trade_size: 0.001,
-    max_trade_size: 1000,
-    precision: 8,
+    spread: rng.nextFloat(defaults.spread.min, defaults.spread.max),
+    pip_value: defaults.pip_value,
+    min_trade_size: defaults.min_trade_size,
+    max_trade_size: defaults.max_trade_size,
+    precision: defaults.precision,
   };
 }
 
@@ -181,16 +219,18 @@ function generateForexPair(
 ): Instrument {
   const rng = new SeededRandom(seed);
 
+  const defaults = INSTRUMENT_DEFAULTS.forex;
+
   return {
     id: `FOREX_${base}_${quote}`,
     name: name,
     symbol: `${base}/${quote}`,
     type: 'forex',
-    spread: rng.nextFloat(0.00001, 0.0001), // 0.001% - 0.01%
-    pip_value: 0.0001,
-    min_trade_size: 0.01,
-    max_trade_size: 100,
-    precision: 5,
+    spread: rng.nextFloat(defaults.spread.min, defaults.spread.max),
+    pip_value: defaults.pip_value,
+    min_trade_size: defaults.min_trade_size,
+    max_trade_size: defaults.max_trade_size,
+    precision: defaults.precision,
   };
 }
 
@@ -221,9 +261,8 @@ export function generateInstruments(
   const instruments: Instrument[] = [];
 
   // Calculate distribution based on realistic market composition
-  // Target: ~50% stocks, ~25% crypto, ~25% forex
-  const stockCount = Math.floor(count * 0.5);
-  const cryptoCount = Math.floor(count * 0.25);
+  const stockCount = Math.floor(count * DISTRIBUTION_RATIOS.stock);
+  const cryptoCount = Math.floor(count * DISTRIBUTION_RATIOS.crypto);
   const forexCount = count - stockCount - cryptoCount;
 
   // Generate stocks
