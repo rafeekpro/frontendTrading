@@ -1,4 +1,12 @@
 /**
+ * LCG constants from Numerical Recipes
+ * These values provide good randomness properties for a Linear Congruential Generator
+ */
+const LCG_MULTIPLIER = 1664525;
+const LCG_INCREMENT = 1013904223;
+const LCG_MODULUS = 4294967296; // 2^32 - more efficient than Math.pow(2, 32)
+
+/**
  * SeededRandom - Deterministic Random Number Generator
  *
  * Implements a Linear Congruential Generator (LCG) for reproducible random numbers.
@@ -19,23 +27,15 @@
  * ```
  */
 export class SeededRandom {
-  private seed: number;
-
-  /**
-   * LCG constants from Numerical Recipes
-   * These values provide good randomness properties
-   */
-  private readonly a = 1664525;
-  private readonly c = 1013904223;
-  private readonly m = Math.pow(2, 32);
+  private state: number;
 
   /**
    * Creates a new seeded random number generator
    * @param seed - Seed value for reproducibility (any integer)
    */
   constructor(seed: number) {
-    // Normalize seed to positive integer
-    this.seed = Math.abs(Math.floor(seed)) % this.m;
+    // Normalize seed to positive integer within modulus range
+    this.state = Math.abs(Math.floor(seed)) % LCG_MODULUS;
   }
 
   /**
@@ -44,10 +44,18 @@ export class SeededRandom {
    */
   next(): number {
     // Apply LCG formula: X(n+1) = (a * X(n) + c) mod m
-    this.seed = (this.a * this.seed + this.c) % this.m;
+    this.state = (LCG_MULTIPLIER * this.state + LCG_INCREMENT) % LCG_MODULUS;
 
     // Normalize to [0, 1)
-    return this.seed / this.m;
+    return this.state / LCG_MODULUS;
+  }
+
+  /**
+   * Normalizes min/max range to ensure min <= max
+   * @private
+   */
+  private normalizeRange(min: number, max: number): [number, number] {
+    return min > max ? [max, min] : [min, max];
   }
 
   /**
@@ -57,12 +65,8 @@ export class SeededRandom {
    * @returns Random integer in range [min, max]
    */
   nextInt(min: number, max: number): number {
-    // Swap if inverted
-    if (min > max) {
-      [min, max] = [max, min];
-    }
+    [min, max] = this.normalizeRange(min, max);
 
-    // Generate random value in range
     const range = max - min + 1;
     return Math.floor(this.next() * range) + min;
   }
@@ -74,12 +78,8 @@ export class SeededRandom {
    * @returns Random float in range [min, max]
    */
   nextFloat(min: number, max: number): number {
-    // Swap if inverted
-    if (min > max) {
-      [min, max] = [max, min];
-    }
+    [min, max] = this.normalizeRange(min, max);
 
-    // Generate random value in range
     return this.next() * (max - min) + min;
   }
 
