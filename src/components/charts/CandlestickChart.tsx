@@ -6,13 +6,16 @@
 import { useEffect, useRef } from 'react';
 import {
   createChart,
-  ColorType,
   type IChartApi,
   type ISeriesApi,
-  type CandlestickData,
-  type HistogramData,
 } from 'lightweight-charts';
 import type { Candlestick, Timeframe } from '@/types/trading';
+import {
+  getDefaultChartOptions,
+  CANDLESTICK_SERIES_OPTIONS,
+  VOLUME_SERIES_OPTIONS,
+} from '@/lib/chart-config';
+import { convertToCandlestickData, convertToVolumeData } from '@/lib/chart-utils';
 
 interface CandlestickChartProps {
   /** Candlestick data to display */
@@ -46,50 +49,19 @@ export function CandlestickChart({
       return;
     }
 
-    // Create chart instance
-    const chart = createChart(chartContainerRef.current, {
-      layout: {
-        background: {
-          type: ColorType.Solid,
-          color: '#1a1a1a',
-        },
-        textColor: '#d1d5db',
-      },
-      grid: {
-        vertLines: {
-          color: '#2a2a2a',
-        },
-        horzLines: {
-          color: '#2a2a2a',
-        },
-      },
-      width: chartContainerRef.current.clientWidth,
-      height,
-    });
+    // Create chart instance with default options
+    const containerWidth = chartContainerRef.current.clientWidth;
+    const chartOptions = getDefaultChartOptions(containerWidth, height);
+    const chart = createChart(chartContainerRef.current, chartOptions);
 
     chartRef.current = chart;
 
     // Add candlestick series
-    const candlestickSeries = chart.addCandlestickSeries({
-      upColor: '#22c55e',
-      downColor: '#ef4444',
-      borderUpColor: '#22c55e',
-      borderDownColor: '#ef4444',
-      wickUpColor: '#22c55e',
-      wickDownColor: '#ef4444',
-    });
-
+    const candlestickSeries = chart.addCandlestickSeries(CANDLESTICK_SERIES_OPTIONS);
     candlestickSeriesRef.current = candlestickSeries;
 
     // Add volume series
-    const volumeSeries = chart.addHistogramSeries({
-      color: '#6366f1',
-      priceFormat: {
-        type: 'volume',
-      },
-      priceScaleId: '',
-    });
-
+    const volumeSeries = chart.addHistogramSeries(VOLUME_SERIES_OPTIONS);
     volumeSeriesRef.current = volumeSeries;
 
     // Setup ResizeObserver
@@ -118,20 +90,9 @@ export function CandlestickChart({
       return;
     }
 
-    // Convert data to lightweight-charts format
-    const candlestickData: CandlestickData[] = data.map((candle) => ({
-      time: Math.floor(candle.timestamp / 1000) as never, // Convert to seconds
-      open: candle.open,
-      high: candle.high,
-      low: candle.low,
-      close: candle.close,
-    }));
-
-    const volumeData: HistogramData[] = data.map((candle) => ({
-      time: Math.floor(candle.timestamp / 1000) as never, // Convert to seconds
-      value: candle.volume,
-      color: candle.close >= candle.open ? '#22c55e40' : '#ef444440',
-    }));
+    // Convert data to lightweight-charts format using utilities
+    const candlestickData = convertToCandlestickData(data);
+    const volumeData = convertToVolumeData(data);
 
     // Set data
     candlestickSeriesRef.current.setData(candlestickData);

@@ -69,3 +69,53 @@ export function formatCurrency(
 export function formatPrice(price: number, precision: number): string {
   return price.toFixed(precision);
 }
+
+/**
+ * Candlestick Chart Data Transformation Utilities
+ */
+
+import type { CandlestickData, HistogramData } from 'lightweight-charts';
+import type { Candlestick } from '@/types/trading';
+
+const CHART_COLORS = {
+  volumeUp: '#22c55e40',
+  volumeDown: '#ef444440',
+} as const;
+
+/**
+ * Convert timestamp from milliseconds to seconds for lightweight-charts
+ */
+export function convertTimestamp(timestampMs: number): number {
+  return Math.floor(timestampMs / 1000);
+}
+
+/**
+ * Convert candlestick data to lightweight-charts format
+ */
+export function convertToCandlestickData(data: Candlestick[]): CandlestickData[] {
+  return data.map((candle) => ({
+    time: convertTimestamp(candle.timestamp) as never,
+    open: candle.open,
+    high: candle.high,
+    low: candle.low,
+    close: candle.close,
+  }));
+}
+
+/**
+ * Get volume bar color based on candle direction
+ */
+export function getVolumeColor(candle: Candlestick): string {
+  return candle.close >= candle.open ? CHART_COLORS.volumeUp : CHART_COLORS.volumeDown;
+}
+
+/**
+ * Convert candlestick data to volume histogram format
+ */
+export function convertToVolumeData(data: Candlestick[]): HistogramData[] {
+  return data.map((candle) => ({
+    time: convertTimestamp(candle.timestamp) as never,
+    value: candle.volume,
+    color: getVolumeColor(candle),
+  }));
+}
