@@ -146,23 +146,7 @@ describe('CandlestickChart', () => {
     });
 
     it('should apply dark theme configuration', async () => {
-      const mockChart = {
-        addCandlestickSeries: vi.fn(() => ({
-          setData: vi.fn(),
-        })),
-        addHistogramSeries: vi.fn(() => ({
-          setData: vi.fn(),
-        })),
-        applyOptions: vi.fn(),
-        timeScale: vi.fn(() => ({
-          fitContent: vi.fn(),
-        })),
-        resize: vi.fn(),
-        remove: vi.fn(),
-      };
-
       const { createChart } = await import('lightweight-charts');
-      (createChart as ReturnType<typeof vi.fn>).mockReturnValue(mockChart);
 
       render(
         <CandlestickChart
@@ -172,13 +156,16 @@ describe('CandlestickChart', () => {
       );
 
       await waitFor(() => {
-        expect(mockChart.applyOptions).toHaveBeenCalledWith(
+        // Check that createChart was called with dark theme options
+        expect(createChart).toHaveBeenCalledWith(
+          expect.any(HTMLDivElement),
           expect.objectContaining({
             layout: expect.objectContaining({
               background: expect.objectContaining({
                 type: 'Solid',
+                color: '#1a1a1a',
               }),
-              textColor: expect.any(String),
+              textColor: '#d1d5db',
             }),
           })
         );
@@ -463,7 +450,8 @@ describe('CandlestickChart', () => {
         />
       );
 
-      expect(screen.getByText(/error/i)).toBeInTheDocument();
+      expect(screen.getByText(/Error loading chart/i)).toBeInTheDocument();
+      expect(screen.getByText(/Network error/i)).toBeInTheDocument();
     });
   });
 
@@ -494,23 +482,15 @@ describe('CandlestickChart', () => {
 
   describe('Responsive Behavior', () => {
     it('should resize chart on container size change', async () => {
-      const mockChart = {
-        addCandlestickSeries: vi.fn(() => ({
-          setData: vi.fn(),
-        })),
-        addHistogramSeries: vi.fn(() => ({
-          setData: vi.fn(),
-        })),
-        applyOptions: vi.fn(),
-        timeScale: vi.fn(() => ({
-          fitContent: vi.fn(),
-        })),
-        resize: vi.fn(),
-        remove: vi.fn(),
-      };
-
-      const { createChart } = await import('lightweight-charts');
-      (createChart as ReturnType<typeof vi.fn>).mockReturnValue(mockChart);
+      const mockObserve = vi.fn();
+      global.ResizeObserver = class ResizeObserver {
+        observe = mockObserve;
+        unobserve = vi.fn();
+        disconnect = vi.fn();
+        constructor() {
+          // Empty constructor
+        }
+      } as never;
 
       render(
         <CandlestickChart
@@ -520,7 +500,7 @@ describe('CandlestickChart', () => {
       );
 
       await waitFor(() => {
-        expect(global.ResizeObserver).toHaveBeenCalled();
+        expect(mockObserve).toHaveBeenCalled();
       });
     });
 

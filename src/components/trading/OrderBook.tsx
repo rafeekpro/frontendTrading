@@ -4,6 +4,7 @@
  */
 
 import type { OrderBookEntry } from '../../types/trading';
+import { formatPrice, formatVolume } from '../../lib/format-utils';
 
 interface OrderBookProps {
   bids: OrderBookEntry[];
@@ -11,28 +12,26 @@ interface OrderBookProps {
   spread: number;
 }
 
-export function OrderBook({ bids, asks, spread }: OrderBookProps) {
-  // Calculate maximum total for depth bar scaling
-  const maxTotal = Math.max(
+/**
+ * Calculate maximum total volume for depth bar scaling
+ */
+function calculateMaxTotal(bids: OrderBookEntry[], asks: OrderBookEntry[]): number {
+  return Math.max(
     ...bids.map((b) => b.total),
     ...asks.map((a) => a.total),
     1 // Prevent division by zero
   );
+}
 
-  // Format price with 5 decimal places
-  const formatPrice = (price: number): string => {
-    return price.toFixed(5);
-  };
+/**
+ * Calculate depth bar width as percentage
+ */
+function getDepthWidth(total: number, maxTotal: number): string {
+  return `${(total / maxTotal) * 100}%`;
+}
 
-  // Format volume with thousands separators
-  const formatVolume = (volume: number): string => {
-    return volume.toLocaleString('en-US', { maximumFractionDigits: 0 });
-  };
-
-  // Calculate depth bar width percentage
-  const getDepthWidth = (total: number): string => {
-    return `${(total / maxTotal) * 100}%`;
-  };
+export function OrderBook({ bids, asks, spread }: OrderBookProps) {
+  const maxTotal = calculateMaxTotal(bids, asks);
 
   return (
     <div className="w-full overflow-auto" data-testid="orderbook-container">
