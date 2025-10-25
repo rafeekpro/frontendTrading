@@ -25,7 +25,7 @@ describe('SearchBar', () => {
     expect(input).toBeInTheDocument();
   });
 
-  it('should call onChange when user types (immediately for controlled input)', async () => {
+  it('should call onChange after debounce delay when user types', async () => {
     const user = userEvent.setup();
     const handleChange = vi.fn();
 
@@ -34,8 +34,16 @@ describe('SearchBar', () => {
     const input = screen.getByRole('textbox');
     await user.type(input, 'E');
 
-    // onChange called immediately for controlled input
-    expect(handleChange).toHaveBeenCalledWith('E');
+    // onChange NOT called immediately (debounced)
+    expect(handleChange).not.toHaveBeenCalled();
+
+    // Wait for debounce delay (300ms)
+    await waitFor(
+      () => {
+        expect(handleChange).toHaveBeenCalledWith('E');
+      },
+      { timeout: 500 }
+    );
   });
 
   it('should display search icon', () => {
@@ -60,7 +68,7 @@ describe('SearchBar', () => {
     expect(clearButton).not.toBeInTheDocument();
   });
 
-  it('should clear value when clear button is clicked', async () => {
+  it('should clear value when clear button is clicked (immediately, not debounced)', async () => {
     const user = userEvent.setup();
     const handleChange = vi.fn();
 
@@ -69,10 +77,11 @@ describe('SearchBar', () => {
     const clearButton = screen.getByRole('button', { name: /clear/i });
     await user.click(clearButton);
 
+    // Clear should call onChange immediately (not debounced)
     expect(handleChange).toHaveBeenCalledWith('');
   });
 
-  it('should update input value immediately (controlled behavior)', async () => {
+  it('should debounce onChange calls when typing rapidly', async () => {
     const user = userEvent.setup();
     const handleChange = vi.fn();
 
@@ -80,14 +89,20 @@ describe('SearchBar', () => {
 
     const input = screen.getByRole('textbox');
 
-    // Type multiple characters
+    // Type multiple characters rapidly
     await user.type(input, 'EUR');
 
-    // onChange called for each keystroke (E, U, R)
-    expect(handleChange).toHaveBeenCalledTimes(3);
-    expect(handleChange).toHaveBeenNthCalledWith(1, 'E');
-    expect(handleChange).toHaveBeenNthCalledWith(2, 'EU');
-    expect(handleChange).toHaveBeenNthCalledWith(3, 'EUR');
+    // onChange NOT called immediately (debounced)
+    expect(handleChange).not.toHaveBeenCalled();
+
+    // Wait for debounce delay - should only be called once with final value
+    await waitFor(
+      () => {
+        expect(handleChange).toHaveBeenCalledTimes(1);
+        expect(handleChange).toHaveBeenCalledWith('EUR');
+      },
+      { timeout: 500 }
+    );
   });
 
   it('should use custom placeholder when provided', () => {
@@ -162,7 +177,7 @@ describe('SearchBar', () => {
     const clearButton = screen.getByRole('button', { name: /clear/i });
     expect(clearButton).toHaveFocus();
 
-    // Activate clear button with Enter
+    // Activate clear button with Enter (clear is immediate)
     await user.keyboard('{Enter}');
     expect(handleChange).toHaveBeenCalledWith('');
   });
