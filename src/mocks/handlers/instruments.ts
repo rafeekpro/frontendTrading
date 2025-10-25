@@ -64,8 +64,8 @@ const VALID_TIMEFRAMES: Timeframe[] = ['M1', 'M5', 'M15', 'M30', 'H1', 'H4', 'D1
  * TODO: Replace with sophisticated generator from Stream B
  */
 function generatePlaceholderCandlesticks(
-  instrumentId: string,
-  timeframe: Timeframe,
+  _instrumentId: string,
+  _timeframe: Timeframe,
   count: number = 100
 ): Candlestick[] {
   const candlesticks: Candlestick[] = [];
@@ -103,7 +103,7 @@ function findInstrument(id: string): Instrument | undefined {
 /**
  * Helper to create error response
  */
-function createErrorResponse(status: number, error: string, message: string): HttpResponse {
+function createErrorResponse(status: number, error: string, message: string) {
   const errorBody: ErrorResponse = {
     error,
     message,

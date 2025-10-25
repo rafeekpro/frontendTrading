@@ -96,3 +96,29 @@ export interface CandlestickGeneratorConfig {
   /** Seed for deterministic random generation */
   seed?: number;
 }
+
+/**
+ * API Response types
+ */
+export interface InstrumentsResponse {
+  instruments: Instrument[];
+}
+
+export interface InstrumentResponse {
+  instrument: Instrument;
+}
+
+export interface CandlesticksResponse {
+  candlesticks: Candlestick[];
+  instrument_id: string;
+  timeframe: Timeframe;
+}
+
+/**
+ * Error response interface
+ */
+export interface ErrorResponse {
+  error: string;
+  message: string;
+  status: number;
+}
