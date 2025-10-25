@@ -6,23 +6,21 @@
  *
  * Current exports:
  * - SeededRandom: Deterministic random number generator for reproducibility
- *
- * Future exports (to be added by Streams B & C):
- * - Instrument generators (stocks, crypto, forex)
- * - Candlestick/OHLCV data generators
- * - Trade history generators
- * - Position generators
- * - Trading opportunity generators
+ * - generateInstruments: Generate stocks, crypto, forex instruments
+ * - generateCandlesticks: Generate OHLCV candlestick data
+ * - generateTrades: Generate historical trade records with realistic P&L
+ * - generatePositions: Generate open positions with unrealized P&L
+ * - generateOpportunities: Generate trading signals with risk/reward ratios
  */
 
 // Foundation (Stream A)
 export * from './seed';
 
-// Instrument generators (Stream B - to be added)
-// export * from './instruments';
+// Instrument & Market Data generators (Stream B)
+export * from './instruments';
+export * from './candlesticks';
 
-// Market data generators (Stream C - to be added)
-// export * from './candlesticks';
-// export * from './trades';
-// export * from './positions';
-// export * from './opportunities';
+// Trading data generators (Stream C)
+export * from './trades';
+export * from './positions';
+export * from './opportunities';
