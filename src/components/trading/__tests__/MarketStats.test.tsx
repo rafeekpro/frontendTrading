@@ -270,7 +270,9 @@ describe('MarketStats', () => {
       };
       render(<MarketStats stats={zeroStats} />);
 
-      expect(screen.getByText('0.00000')).toBeInTheDocument();
+      // Multiple zero values will be present (high, low, vwap)
+      const zeroValues = screen.getAllByText('0.00000');
+      expect(zeroValues.length).toBeGreaterThan(0);
     });
 
     it('should format zero volume correctly', () => {
