@@ -9,6 +9,32 @@ import { SeededRandom } from './seed';
 import type { Candlestick, Timeframe } from '../../types/trading';
 
 /**
+ * Price movement constants
+ */
+const PRICE_CONSTANTS = {
+  drift: 0.00001, // Slight upward bias (0.001% per candle)
+  volatility: 0.015, // 1.5% standard deviation
+  slippageRange: 0.0001, // ±0.01% slippage between candles
+} as const;
+
+/**
+ * Wick generation constants
+ */
+const WICK_CONSTANTS = {
+  minRatio: 0.2, // Minimum wick size as ratio of body
+  maxRatio: 0.8, // Maximum wick size as ratio of body
+} as const;
+
+/**
+ * Volume distribution constants (log-normal)
+ */
+const VOLUME_CONSTANTS = {
+  mean: 1000000, // 1 million average volume
+  stdDev: 0.5, // Standard deviation for log-normal
+  minimum: 10000, // Minimum volume (10k)
+} as const;
+
+/**
  * Timeframe durations in milliseconds
  */
 const TIMEFRAME_MS: Record<Timeframe, number> = {
@@ -19,7 +45,7 @@ const TIMEFRAME_MS: Record<Timeframe, number> = {
   H1: 60 * 60 * 1000, // 1 hour
   H4: 4 * 60 * 60 * 1000, // 4 hours
   D1: 24 * 60 * 60 * 1000, // 1 day
-};
+} as const;
 
 /**
  * Base prices for different instrument types
@@ -102,17 +128,18 @@ function roundToPrecision(value: number, precision: number): number {
 /**
  * Generate log-normal distributed volume
  */
-function generateLogNormalVolume(rng: SeededRandom, mean: number, stdDev: number): number {
+function generateLogNormalVolume(rng: SeededRandom): number {
   // Box-Muller transform for normal distribution
   const u1 = rng.next();
   const u2 = rng.next();
   const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
 
   // Log-normal: exp(mu + sigma * Z)
+  const { mean, stdDev, minimum } = VOLUME_CONSTANTS;
   const logMean = Math.log(mean) - (stdDev * stdDev) / 2;
   const volume = Math.exp(logMean + stdDev * z0);
 
-  return Math.max(10000, Math.round(volume)); // Minimum 10k volume
+  return Math.max(minimum, Math.round(volume));
 }
 
 /**
@@ -125,10 +152,9 @@ function generateSingleCandlestick(
   rng: SeededRandom
 ): Candlestick {
   // Price movement: random walk with drift
-  const drift = 0.00001; // Slight upward bias (0.001%)
-  const volatility = 0.015; // 1.5% standard deviation
+  const { drift, volatility } = PRICE_CONSTANTS;
 
-  // Normal distribution for price change
+  // Normal distribution for price change (Box-Muller transform)
   const u1 = rng.next();
   const u2 = rng.next();
   const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
@@ -141,13 +167,15 @@ function generateSingleCandlestick(
   const lowerPrice = Math.min(openPrice, closePrice);
 
   const bodySize = Math.abs(upperPrice - lowerPrice);
-  const wickSize = bodySize * rng.nextFloat(0.2, 0.8); // Wicks are 20-80% of body
+  const wickSize =
+    bodySize *
+    rng.nextFloat(WICK_CONSTANTS.minRatio, WICK_CONSTANTS.maxRatio);
 
   const high = upperPrice + wickSize * rng.nextFloat(0, 1);
   const low = lowerPrice - wickSize * rng.nextFloat(0, 1);
 
   // Generate volume (log-normal distribution)
-  const volume = generateLogNormalVolume(rng, 1000000, 0.5);
+  const volume = generateLogNormalVolume(rng);
 
   return {
     timestamp,
@@ -214,7 +242,8 @@ export function generateCandlesticks(
     candlesticks.push(candle);
 
     // Next candle opens at previous close (with small slippage)
-    const slippage = rng.nextFloat(-0.0001, 0.0001); // ±0.01% slippage
+    const { slippageRange } = PRICE_CONSTANTS;
+    const slippage = rng.nextFloat(-slippageRange, slippageRange);
     currentPrice = candle.close * (1 + slippage);
     currentTime += interval;
   }
