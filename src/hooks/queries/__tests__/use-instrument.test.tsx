@@ -110,10 +110,13 @@ describe('useInstrument', () => {
   });
 
   it('should refetch when ID changes', async () => {
+    // Create a single wrapper instance to share QueryClient
+    const wrapper = createWrapper();
+
     const { result, rerender } = renderHook(
       ({ id }) => useInstrument(id),
       {
-        wrapper: createWrapper(),
+        wrapper,
         initialProps: { id: 'EUR_USD' },
       }
     );
@@ -123,19 +126,20 @@ describe('useInstrument', () => {
     const firstData = result.current.data;
     expect(firstData!.id).toBe('EUR_USD');
 
-    // Change ID
+    // Change ID - this should trigger a new query
     rerender({ id: 'GBP_USD' });
 
-    // Wait for second query
+    // Wait for loading state (query is refetching)
+    await waitFor(() => expect(result.current.isFetching).toBe(true));
+
+    // Wait for second query to complete
     await waitFor(() => {
-      return (
-        result.current.isSuccess &&
-        result.current.data?.id === 'GBP_USD'
-      );
+      return result.current.isSuccess && !result.current.isFetching;
     });
 
-    // Data should be different
-    expect(result.current.data).not.toBe(firstData);
+    // Verify new data is loaded
+    expect(result.current.data).toBeDefined();
     expect(result.current.data!.id).toBe('GBP_USD');
+    expect(result.current.data).not.toBe(firstData);
   });
 });
