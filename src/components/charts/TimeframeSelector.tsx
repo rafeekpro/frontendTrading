@@ -5,6 +5,7 @@
 
 import { type Timeframe } from '@/types/trading';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface TimeframeSelectorProps {
   /** Currently selected timeframe */
@@ -14,6 +15,17 @@ interface TimeframeSelectorProps {
 }
 
 const TIMEFRAMES: Timeframe[] = ['M1', 'M5', 'M15', 'H1', 'H4', 'D1'];
+
+/**
+ * Get button styling based on selection state
+ */
+function getButtonClassName(isSelected: boolean): string {
+  const baseStyles = 'px-3 py-1.5 text-sm font-medium rounded transition-all';
+  const selectedStyles = 'bg-blue-600 text-white hover:bg-blue-700';
+  const unselectedStyles = 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white';
+
+  return cn(baseStyles, isSelected ? selectedStyles : unselectedStyles);
+}
 
 export function TimeframeSelector({ selected, onChange }: TimeframeSelectorProps) {
   return (
@@ -29,14 +41,7 @@ export function TimeframeSelector({ selected, onChange }: TimeframeSelectorProps
             key={timeframe}
             onClick={() => onChange(timeframe)}
             aria-pressed={isSelected}
-            className={`
-              px-3 py-1.5 text-sm font-medium rounded transition-all
-              ${
-                isSelected
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
-              }
-            `}
+            className={getButtonClassName(isSelected)}
             variant="ghost"
           >
             {timeframe}
