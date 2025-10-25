@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { useDebounce } from '../use-debounce';
 
 describe('useDebounce', () => {
@@ -32,15 +32,17 @@ describe('useDebounce', () => {
     expect(result.current).toBe('initial');
 
     // Fast-forward time by 299ms (still not debounced)
-    vi.advanceTimersByTime(299);
+    await act(async () => {
+      vi.advanceTimersByTime(299);
+    });
     expect(result.current).toBe('initial');
 
     // Fast-forward time by 1ms more (total 300ms - should debounce)
-    vi.advanceTimersByTime(1);
-
-    await waitFor(() => {
-      expect(result.current).toBe('updated');
+    await act(async () => {
+      vi.advanceTimersByTime(1);
     });
+
+    expect(result.current).toBe('updated');
   });
 
   it('should debounce value changes with custom delay', async () => {
@@ -52,15 +54,17 @@ describe('useDebounce', () => {
     rerender({ value: 'updated', delay: 500 });
 
     // Fast-forward by 499ms
-    vi.advanceTimersByTime(499);
+    await act(async () => {
+      vi.advanceTimersByTime(499);
+    });
     expect(result.current).toBe('initial');
 
     // Fast-forward by 1ms more (total 500ms)
-    vi.advanceTimersByTime(1);
-
-    await waitFor(() => {
-      expect(result.current).toBe('updated');
+    await act(async () => {
+      vi.advanceTimersByTime(1);
     });
+
+    expect(result.current).toBe('updated');
   });
 
   it('should cancel previous timeout when value changes rapidly', async () => {
@@ -71,11 +75,15 @@ describe('useDebounce', () => {
 
     // First change
     rerender({ value: 'first' });
-    vi.advanceTimersByTime(100);
+    await act(async () => {
+      vi.advanceTimersByTime(100);
+    });
 
     // Second change (should cancel first timeout)
     rerender({ value: 'second' });
-    vi.advanceTimersByTime(100);
+    await act(async () => {
+      vi.advanceTimersByTime(100);
+    });
 
     // Third change (should cancel second timeout)
     rerender({ value: 'third' });
@@ -84,11 +92,11 @@ describe('useDebounce', () => {
     expect(result.current).toBe('initial');
 
     // Now wait full 300ms from last change
-    vi.advanceTimersByTime(300);
-
-    await waitFor(() => {
-      expect(result.current).toBe('third');
+    await act(async () => {
+      vi.advanceTimersByTime(300);
     });
+
+    expect(result.current).toBe('third');
   });
 
   it('should cleanup timeout on unmount', () => {
@@ -108,11 +116,11 @@ describe('useDebounce', () => {
     );
 
     rerender({ value: 42 });
-    vi.advanceTimersByTime(300);
-
-    await waitFor(() => {
-      expect(result.current).toBe(42);
+    await act(async () => {
+      vi.advanceTimersByTime(300);
     });
+
+    expect(result.current).toBe(42);
   });
 
   it('should work with different data types (object)', async () => {
@@ -125,11 +133,11 @@ describe('useDebounce', () => {
     );
 
     rerender({ value: updatedObj });
-    vi.advanceTimersByTime(300);
-
-    await waitFor(() => {
-      expect(result.current).toEqual(updatedObj);
+    await act(async () => {
+      vi.advanceTimersByTime(300);
     });
+
+    expect(result.current).toEqual(updatedObj);
   });
 
   it('should work with different data types (array)', async () => {
@@ -139,11 +147,11 @@ describe('useDebounce', () => {
     );
 
     rerender({ value: [4, 5, 6] });
-    vi.advanceTimersByTime(300);
-
-    await waitFor(() => {
-      expect(result.current).toEqual([4, 5, 6]);
+    await act(async () => {
+      vi.advanceTimersByTime(300);
     });
+
+    expect(result.current).toEqual([4, 5, 6]);
   });
 
   it('should handle delay changes', async () => {
@@ -156,10 +164,10 @@ describe('useDebounce', () => {
     rerender({ value: 'updated', delay: 100 });
 
     // Should use new delay (100ms)
-    vi.advanceTimersByTime(100);
-
-    await waitFor(() => {
-      expect(result.current).toBe('updated');
+    await act(async () => {
+      vi.advanceTimersByTime(100);
     });
+
+    expect(result.current).toBe('updated');
   });
 });
