@@ -178,5 +178,53 @@ export const instrumentsHandlers = [
         'Access-Control-Allow-Origin': '*'
       }
     });
+  }),
+
+  /**
+   * GET /api/instruments/:id
+   * Returns single instrument by ID
+   */
+  http.get('*/api/instruments/:id', ({ params }) => {
+    const { id } = params;
+
+    if (typeof id !== 'string') {
+      return createErrorResponse(400, 'BAD_REQUEST', 'Invalid instrument ID format');
+    }
+
+    const instrument = findInstrument(id);
+
+    if (!instrument) {
+      return createErrorResponse(404, 'NOT_FOUND', `Instrument with ID "${id}" not found`);
+    }
+
+    const response: InstrumentResponse = {
+      instrument
+    };
+
+    return HttpResponse.json(response, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+  }),
+
+  /**
+   * GET /api/instruments
+   * Returns list of all available instruments
+   */
+  http.get('*/api/instruments', () => {
+    const response: InstrumentsResponse = {
+      instruments: PLACEHOLDER_INSTRUMENTS
+    };
+
+    return HttpResponse.json(response, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
   })
 ];
