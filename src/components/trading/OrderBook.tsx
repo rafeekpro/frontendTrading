@@ -83,7 +83,7 @@ export function OrderBook({ bids, asks, spread }: OrderBookProps) {
                   <div
                     data-testid={`depth-bar-ask-${index}`}
                     className="absolute inset-0 bg-red-500 bg-opacity-10"
-                    style={{ width: getDepthWidth(ask.total) }}
+                    style={{ width: getDepthWidth(ask.total, maxTotal) }}
                   />
                   <span className="relative">{formatPrice(ask.price)}</span>
                 </td>
@@ -122,7 +122,7 @@ export function OrderBook({ bids, asks, spread }: OrderBookProps) {
                   <div
                     data-testid={`depth-bar-bid-${index}`}
                     className="absolute inset-0 bg-green-500 bg-opacity-10"
-                    style={{ width: getDepthWidth(bid.total) }}
+                    style={{ width: getDepthWidth(bid.total, maxTotal) }}
                   />
                   <span className="relative">{formatPrice(bid.price)}</span>
                 </td>
