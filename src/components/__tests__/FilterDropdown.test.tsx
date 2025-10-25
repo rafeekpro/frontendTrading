@@ -39,12 +39,12 @@ describe('FilterDropdown', () => {
     const button = screen.getByRole('button');
     await user.click(button);
 
-    // Check all options are present
-    expect(screen.getByRole('menuitem', { name: /all/i })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: /favorites/i })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: /forex/i })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: /crypto/i })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: /stocks/i })).toBeInTheDocument();
+    // Check all options are present (using menuitemradio role)
+    expect(screen.getByRole('menuitemradio', { name: /all/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitemradio', { name: /favorites/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitemradio', { name: /forex/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitemradio', { name: /crypto/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitemradio', { name: /stocks/i })).toBeInTheDocument();
   });
 
   it('should call onChange when option is selected', async () => {
@@ -56,7 +56,7 @@ describe('FilterDropdown', () => {
     const button = screen.getByRole('button');
     await user.click(button);
 
-    const forexOption = screen.getByRole('menuitem', { name: /forex/i });
+    const forexOption = screen.getByRole('menuitemradio', { name: /forex/i });
     await user.click(forexOption);
 
     expect(handleChange).toHaveBeenCalledWith('forex');
@@ -69,7 +69,7 @@ describe('FilterDropdown', () => {
     const button = screen.getByRole('button');
     await user.click(button);
 
-    const forexOption = screen.getByRole('menuitem', { name: /forex/i });
+    const forexOption = screen.getByRole('menuitemradio', { name: /forex/i });
     await user.click(forexOption);
 
     // Menu should close after selection
@@ -84,9 +84,9 @@ describe('FilterDropdown', () => {
     const button = screen.getByRole('button');
     await user.click(button);
 
-    const cryptoOption = screen.getByRole('menuitem', { name: /crypto/i });
-    // Selected item should have aria-selected or special styling
-    expect(cryptoOption).toHaveAttribute('aria-selected', 'true');
+    const cryptoOption = screen.getByRole('menuitemradio', { name: /crypto/i });
+    // Radio items use aria-checked instead of aria-selected
+    expect(cryptoOption).toHaveAttribute('aria-checked', 'true');
   });
 
   it('should support keyboard navigation', async () => {
@@ -150,9 +150,11 @@ describe('FilterDropdown', () => {
     const button = screen.getByRole('button');
     await user.click(button);
 
-    // Check for icons (using data-testid or aria-hidden="true" on SVGs)
-    const icons = screen.getAllByRole('img', { hidden: true });
-    expect(icons.length).toBeGreaterThan(0);
+    // Check for icons - SVGs with aria-hidden are present
+    const menu = screen.getByRole('menu');
+    const svgs = menu.querySelectorAll('svg[aria-hidden="true"]');
+    // 5 filter options, each with an icon
+    expect(svgs.length).toBeGreaterThanOrEqual(5);
   });
 
   it('should update button text when selected option changes', () => {
@@ -177,7 +179,7 @@ describe('FilterDropdown', () => {
       const button = screen.getByRole('button');
       await user.click(button);
 
-      const menuItem = screen.getByRole('menuitem', { name: new RegExp(option, 'i') });
+      const menuItem = screen.getByRole('menuitemradio', { name: new RegExp(option, 'i') });
       await user.click(menuItem);
 
       expect(handleChange).toHaveBeenCalledWith(option);
