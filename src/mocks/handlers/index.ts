@@ -4,6 +4,7 @@
  */
 
 import { instrumentsHandlers } from './instruments';
+import { tradingHandlers } from './trading';
 
 /**
  * Combined array of all MSW handlers
@@ -11,6 +12,7 @@ import { instrumentsHandlers } from './instruments';
  */
 export const handlers = [
   ...instrumentsHandlers,
+  ...tradingHandlers,
   // Add more handler arrays here:
   // ...ordersHandlers,
   // ...accountHandlers,
