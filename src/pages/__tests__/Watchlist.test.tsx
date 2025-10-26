@@ -38,11 +38,16 @@ vi.mock('../../components/EmptyWatchlist', () => ({
 vi.mock('@dnd-kit/core', () => ({
   DndContext: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   closestCenter: vi.fn(),
+  useSensor: vi.fn(),
+  useSensors: vi.fn(() => []),
+  PointerSensor: vi.fn(),
+  KeyboardSensor: vi.fn(),
 }));
 
 vi.mock('@dnd-kit/sortable', () => ({
   SortableContext: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   verticalListSortingStrategy: vi.fn(),
+  sortableKeyboardCoordinates: vi.fn(),
 }));
 
 describe('Watchlist Page', () => {

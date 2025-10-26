@@ -1,13 +1,22 @@
 /**
  * Watchlist Page
- * GREEN Phase: Minimum implementation to pass tests
+ * REFACTOR Phase: Enhanced with performance optimizations and accessibility
  *
  * Displays user's watchlist with drag-and-drop reordering
  */
 
-import { useMemo } from 'react';
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useMemo, useCallback } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  DragEndEvent,
+  DragStartEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useWatchlist } from '../hooks/use-watchlist';
 import { useInstruments } from '../hooks/queries/use-instruments';
 import { DraggableInstrumentRow } from '../components/DraggableInstrumentRow';
@@ -35,8 +44,20 @@ function extendWithMarketData(instrument: Instrument): InstrumentWithMarketData 
  * - Displays instruments from watchlist store (Stream A integration)
  * - Fetches full instrument data via React Query
  * - Drag-and-drop reordering with @dnd-kit
+ * - Keyboard navigation support (Arrow keys, Space, Enter)
+ * - Screen reader announcements
  * - Empty state when no items in watchlist
  * - Dark theme styling
+ *
+ * Performance Optimizations:
+ * - useMemo for filtered instrument list
+ * - useCallback for stable event handlers
+ * - Optimized sensors configuration
+ *
+ * Accessibility:
+ * - Keyboard navigation with arrow keys
+ * - Screen reader support with ARIA labels
+ * - Focus management during drag operations
  *
  * Integration Points:
  * - Stream A: useWatchlist() hook for watchlist state
@@ -53,7 +74,22 @@ export function Watchlist() {
   const { watchlist, reorderWatchlist } = useWatchlist();
   const { data: instruments, isLoading, isError } = useInstruments();
 
+  // Configure sensors for better drag experience and accessibility
+  // PointerSensor: Drag with mouse/touch
+  // KeyboardSensor: Drag with keyboard (arrow keys)
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Require 8px movement before drag starts (prevents accidental drags)
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   // Filter instruments to only those in watchlist, maintaining order
+  // Memoized to prevent recalculation on every render
   const watchlistInstruments = useMemo(() => {
     if (!instruments || !watchlist || watchlist.length === 0) return [];
 
@@ -63,18 +99,29 @@ export function Watchlist() {
       .map(extendWithMarketData);
   }, [watchlist, instruments]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+  // Stable callback for drag end event
+  // useCallback prevents recreating function on every render
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
 
-    if (over && active.id !== over.id) {
-      const oldIndex = watchlist.indexOf(active.id as string);
-      const newIndex = watchlist.indexOf(over.id as string);
+      if (over && active.id !== over.id) {
+        const oldIndex = watchlist.indexOf(active.id as string);
+        const newIndex = watchlist.indexOf(over.id as string);
 
-      if (oldIndex !== -1 && newIndex !== -1) {
-        reorderWatchlist(oldIndex, newIndex);
+        if (oldIndex !== -1 && newIndex !== -1) {
+          reorderWatchlist(oldIndex, newIndex);
+        }
       }
-    }
-  };
+    },
+    [watchlist, reorderWatchlist]
+  );
+
+  // Optional: Handle drag start for visual feedback
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    // Could add visual feedback here (e.g., change cursor, show overlay)
+    // For now, just a placeholder for future enhancements
+  }, []);
 
   // Show empty state if watchlist is empty
   if (watchlist.length === 0) {
@@ -103,16 +150,32 @@ export function Watchlist() {
 
   return (
     <div className="min-h-screen bg-gray-900 p-6">
-      <h1 className="text-2xl font-bold text-white mb-6">My Watchlist</h1>
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={watchlist} strategy={verticalListSortingStrategy}>
-          <div className="space-y-2">
-            {watchlistInstruments.map((instrument) => (
-              <DraggableInstrumentRow key={instrument.id} instrument={instrument} />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-white mb-2">My Watchlist</h1>
+          <p className="text-gray-400 text-sm">
+            {watchlistInstruments.length} {watchlistInstruments.length === 1 ? 'instrument' : 'instruments'} •
+            Drag to reorder or use keyboard navigation
+          </p>
+        </div>
+
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={watchlist} strategy={verticalListSortingStrategy}>
+            <div className="space-y-2" role="list" aria-label="Watchlist items">
+              {watchlistInstruments.map((instrument) => (
+                <div key={instrument.id} role="listitem">
+                  <DraggableInstrumentRow instrument={instrument} />
+                </div>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      </div>
     </div>
   );
 }
