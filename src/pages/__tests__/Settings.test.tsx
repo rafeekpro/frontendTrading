@@ -18,7 +18,7 @@ describe('Settings Page', () => {
   describe('Layout and Navigation', () => {
     it('should render settings page with heading', () => {
       renderSettings();
-      expect(screen.getByRole('heading', { name: /settings/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /^settings$/i })).toBeInTheDocument();
     });
 
     it('should display all navigation tabs', () => {

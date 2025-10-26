@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { ProfileSettings } from '../components/settings/ProfileSettings';
 
 interface SettingsTab {
   id: string;
@@ -13,8 +14,13 @@ const SETTINGS_TABS: SettingsTab[] = [
   { id: 'display', label: 'Display', path: 'display' },
 ];
 
-function ProfileSettings() {
-  return <div data-testid="profile-settings">Profile Settings Content</div>;
+function ProfileSettingsTab() {
+  return (
+    <div data-testid="profile-settings">
+      <h2 className="text-2xl font-bold mb-6">Profile Settings</h2>
+      <ProfileSettings />
+    </div>
+  );
 }
 
 function APISettings() {
@@ -78,7 +84,7 @@ export function Settings() {
         <div className="flex-1">
           <Routes>
             <Route path="/" element={<Navigate to="profile" replace />} />
-            <Route path="profile" element={<ProfileSettings />} />
+            <Route path="profile" element={<ProfileSettingsTab />} />
             <Route path="api" element={<APISettings />} />
             <Route path="notifications" element={<NotificationSettings />} />
             <Route path="display" element={<DisplaySettings />} />

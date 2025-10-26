@@ -83,18 +83,11 @@ describe('ProfileSettings', () => {
       });
     });
 
-    it('should show validation error for invalid email', async () => {
-      const user = userEvent.setup();
+    it('should not allow editing email field', async () => {
       render(<ProfileSettings />);
 
       const emailInput = screen.getByLabelText(/email/i);
-      await user.clear(emailInput);
-      await user.type(emailInput, 'invalid-email');
-      await user.tab();
-
-      await waitFor(() => {
-        expect(screen.getByText(/invalid email address/i)).toBeInTheDocument();
-      });
+      expect(emailInput).toHaveAttribute('readonly');
     });
 
     it('should show validation error if bio exceeds 200 characters', async () => {
@@ -150,20 +143,19 @@ describe('ProfileSettings', () => {
       render(<ProfileSettings />);
 
       const nameInput = screen.getByLabelText(/name/i);
-      const emailInput = screen.getByLabelText(/email/i);
+      const timezoneSelect = screen.getByLabelText(/timezone/i);
       const saveButton = screen.getByRole('button', { name: /save changes/i });
 
       await user.clear(nameInput);
       await user.type(nameInput, 'Jane Smith');
-      await user.clear(emailInput);
-      await user.type(emailInput, 'jane@example.com');
+      await user.selectOptions(timezoneSelect, 'America/New_York');
 
       await user.click(saveButton);
 
       await waitFor(() => {
         const savedData = JSON.parse(localStorageMock.getItem('userProfile') || '{}');
         expect(savedData.name).toBe('Jane Smith');
-        expect(savedData.email).toBe('jane@example.com');
+        expect(savedData.timezone).toBe('America/New_York');
       });
     });
 
