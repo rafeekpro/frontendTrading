@@ -1,5 +1,10 @@
 import { chromium, FullConfig } from '@playwright/test';
 import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// ES Module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Global Setup for Playwright Tests
@@ -21,23 +26,30 @@ async function globalSetup(config: FullConfig) {
   console.log(`   Base URL: ${baseURL}`);
   console.log(`   Auth file: ${authFile}`);
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
   const page = await context.newPage();
+
+  // Enable console logging for debugging
+  page.on('console', msg => console.log(`   [Browser] ${msg.text()}`));
+  page.on('pageerror', error => console.error(`   [Page Error] ${error.message}`));
 
   try {
     // Navigate to login page
     console.log('   Navigating to login page...');
-    await page.goto(`${baseURL}/login`);
+    await page.goto(`${baseURL}/login`, { waitUntil: 'networkidle', timeout: 30000 });
+
+    // Wait for MSW to initialize
+    await page.waitForTimeout(2000);
 
     // Wait for the login form to be visible
-    await page.waitForSelector('input[name="email"]', { timeout: 10000 });
+    await page.waitForSelector('#email', { timeout: 20000 });
 
     // Fill login form with demo credentials
     // These credentials are mocked by MSW handlers
     console.log('   Filling login credentials...');
-    await page.fill('input[name="email"]', 'user@example.com');
-    await page.fill('input[name="password"]', 'Password123');
+    await page.fill('#email', 'user@example.com');
+    await page.fill('#password', 'Password123');
 
     // Submit the form
     console.log('   Submitting login form...');

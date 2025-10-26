@@ -56,8 +56,8 @@ export default defineConfig({
     navigationTimeout: 30000,
   },
 
-  // Configure global setup
-  globalSetup: './tests/e2e/setup/global-setup.ts',
+  // Configure global setup (only for non-visual tests)
+  globalSetup: process.env.SKIP_AUTH_SETUP ? undefined : './tests/e2e/setup/global-setup.ts',
 
   // Configure projects for major browsers
   projects: [
@@ -65,8 +65,8 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        // Load authenticated state for all tests
-        storageState: 'tests/e2e/.auth/user.json',
+        // Load authenticated state for all tests (except visual tests which override this)
+        storageState: process.env.SKIP_AUTH_SETUP ? undefined : 'tests/e2e/.auth/user.json',
       },
     },
 
