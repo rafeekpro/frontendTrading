@@ -5,6 +5,7 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { Layout } from './components/layout';
 import ComponentShowcase from './pages/ComponentShowcase';
 import { Dashboard } from './pages/Dashboard';
+import { InstrumentDetail } from './pages/InstrumentDetail';
 import { queryClient } from './lib/query-client';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
             <Routes>
               <Route path="/" element={<ComponentShowcase />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/instrument/:id" element={<InstrumentDetail />} />
             </Routes>
           </Layout>
         </ThemeProvider>
