@@ -80,7 +80,7 @@ describe('useAuth', () => {
     expect(typeof result.current.login).toBe('function');
 
     // Call login
-    await result.current.login('user@example.com', 'password123');
+    await result.current.login('user@example.com', 'Password123');
 
     // Wait for state update
     await waitFor(() => {
@@ -98,7 +98,7 @@ describe('useAuth', () => {
     });
 
     // Login first
-    await result.current.login('user@example.com', 'password123');
+    await result.current.login('user@example.com', 'Password123');
     await waitFor(() => {
       expect(result.current.user).not.toBeNull();
     });
@@ -121,7 +121,7 @@ describe('useAuth', () => {
     });
 
     // Start two login attempts concurrently
-    const login1 = result.current.login('user@example.com', 'password123');
+    const login1 = result.current.login('user@example.com', 'Password123');
     const login2 = result.current.login('trader@example.com', 'secure123');
 
     // Both should complete without errors
@@ -151,7 +151,7 @@ describe('useAuth', () => {
     });
 
     // Login with valid credentials
-    await result.current.login('user@example.com', 'password123');
+    await result.current.login('user@example.com', 'Password123');
 
     // Error should be cleared on success
     await waitFor(() => {

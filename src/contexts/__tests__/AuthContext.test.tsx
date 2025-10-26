@@ -37,7 +37,7 @@ function TestComponent() {
         {token && <span data-testid="token">{token}</span>}
       </div>
       <button
-        onClick={() => login('user@example.com', 'password123')}
+        onClick={() => login('user@example.com', 'Password123')}
         data-testid="login-button"
       >
         Login

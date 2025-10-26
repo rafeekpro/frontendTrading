@@ -29,7 +29,7 @@ describe('Authentication API Handlers', () => {
         },
         body: JSON.stringify({
           email: 'user@example.com',
-          password: 'password123',
+          password: 'Password123',
         }),
       });
 
@@ -93,7 +93,7 @@ describe('Authentication API Handlers', () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          password: 'password123',
+          password: 'Password123',
         }),
       });
 
@@ -130,7 +130,7 @@ describe('Authentication API Handlers', () => {
         },
         body: JSON.stringify({
           email: 'user@example.com',
-          password: 'password123',
+          password: 'Password123',
         }),
       });
 
@@ -173,7 +173,7 @@ describe('Authentication API Handlers', () => {
         body: JSON.stringify({
           name: 'Test User',
           email: 'user@example.com', // Already exists
-          password: 'password123',
+          password: 'Password123',
         }),
       });
 

@@ -46,7 +46,7 @@ function LoginTrigger() {
 
   return (
     <button
-      onClick={() => login('user@example.com', 'password123')}
+      onClick(() => login('user@example.com', 'Password123')}
       data-testid="login-trigger"
     >
       Login
