@@ -29,7 +29,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   return (
     <header
       role="banner"
-      className="flex items-center justify-between gap-4 border-b bg-background px-4 py-3 md:px-6"
+      className="flex items-center justify-between gap-4 bg-background px-4 py-3 md:px-6"
     >
       {/* Left section: Hamburger menu + Logo */}
       <div className="flex items-center gap-3">
@@ -42,7 +42,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <div className="text-xl font-bold">TradingPlatform</div>
+        <div className="text-xl font-bold text-foreground">TradingPlatform</div>
       </div>
 
       {/* Center section: Search bar (desktop) */}

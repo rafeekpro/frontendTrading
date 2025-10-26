@@ -30,28 +30,18 @@ interface NavigationItem {
 const navigationItems: NavigationItem[] = [
   {
     name: 'Dashboard',
-    href: '/',
+    href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    name: 'Portfolio',
-    href: '/portfolio',
-    icon: Briefcase,
-  },
-  {
-    name: 'Markets',
-    href: '/markets',
+    name: 'Instruments',
+    href: '/instruments',
     icon: TrendingUp,
   },
   {
-    name: 'Orders',
-    href: '/orders',
-    icon: ShoppingCart,
-  },
-  {
-    name: 'Settings',
-    href: '/settings',
-    icon: Settings,
+    name: 'Watchlist',
+    href: '/watchlist',
+    icon: Briefcase,
   },
 ];
 
@@ -59,7 +49,7 @@ const navigationItems: NavigationItem[] = [
 const SIDEBAR_WIDTH = 'w-60';
 
 const NAV_LINK_CLASSES = {
-  base: 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+  base: 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors',
   hover: 'hover:bg-accent hover:text-accent-foreground',
   focus: 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
   active: 'bg-accent text-accent-foreground',

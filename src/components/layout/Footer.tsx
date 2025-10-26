@@ -17,7 +17,7 @@ export function Footer() {
   return (
     <footer
       role="contentinfo"
-      className="border-t bg-background px-4 py-6 md:px-6"
+      className="bg-background px-4 py-6 md:px-6"
     >
       <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
         {/* Copyright section */}
