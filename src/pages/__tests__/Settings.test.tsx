@@ -2,16 +2,19 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from '../../components/ThemeProvider';
 import { Settings } from '../Settings';
 
 describe('Settings Page', () => {
   const renderSettings = (initialPath = '/settings') => {
     return render(
-      <MemoryRouter initialEntries={[initialPath]}>
-        <Routes>
-          <Route path="/settings/*" element={<Settings />} />
-        </Routes>
-      </MemoryRouter>
+      <ThemeProvider>
+        <MemoryRouter initialEntries={[initialPath]}>
+          <Routes>
+            <Route path="/settings/*" element={<Settings />} />
+          </Routes>
+        </MemoryRouter>
+      </ThemeProvider>
     );
   };
 

@@ -1,5 +1,8 @@
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ProfileSettings } from '../components/settings/ProfileSettings';
+import { APISettings } from '../components/settings/APISettings';
+import { NotificationSettings } from '../components/settings/NotificationSettings';
+import { DisplaySettings } from '../components/settings/DisplaySettings';
 
 interface SettingsTab {
   id: string;
@@ -23,16 +26,31 @@ function ProfileSettingsTab() {
   );
 }
 
-function APISettings() {
-  return <div data-testid="api-settings">API Settings Content</div>;
+function APISettingsTab() {
+  return (
+    <div data-testid="api-settings">
+      <h2 className="text-2xl font-bold mb-6">API Connections</h2>
+      <APISettings />
+    </div>
+  );
 }
 
-function NotificationSettings() {
-  return <div data-testid="notification-settings">Notification Settings Content</div>;
+function NotificationSettingsTab() {
+  return (
+    <div data-testid="notification-settings">
+      <h2 className="text-2xl font-bold mb-6">Notifications</h2>
+      <NotificationSettings />
+    </div>
+  );
 }
 
-function DisplaySettings() {
-  return <div data-testid="display-settings">Display Settings Content</div>;
+function DisplaySettingsTab() {
+  return (
+    <div data-testid="display-settings">
+      <h2 className="text-2xl font-bold mb-6">Display Settings</h2>
+      <DisplaySettings />
+    </div>
+  );
 }
 
 export function Settings() {
@@ -85,9 +103,9 @@ export function Settings() {
           <Routes>
             <Route path="/" element={<Navigate to="profile" replace />} />
             <Route path="profile" element={<ProfileSettingsTab />} />
-            <Route path="api" element={<APISettings />} />
-            <Route path="notifications" element={<NotificationSettings />} />
-            <Route path="display" element={<DisplaySettings />} />
+            <Route path="api" element={<APISettingsTab />} />
+            <Route path="notifications" element={<NotificationSettingsTab />} />
+            <Route path="display" element={<DisplaySettingsTab />} />
           </Routes>
         </div>
       </div>
