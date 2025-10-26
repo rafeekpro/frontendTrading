@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, type FC } from 'react';
 
 interface PasswordStrengthIndicatorProps {
   password: string;
@@ -49,7 +49,7 @@ const getPasswordRequirements = (password: string): PasswordRequirements => {
   };
 };
 
-const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps> = ({ password }) => {
+const PasswordStrengthIndicator: FC<PasswordStrengthIndicatorProps> = ({ password }) => {
   const strength = useMemo(() => calculateStrength(password), [password]);
   const requirements = useMemo(() => getPasswordRequirements(password), [password]);
 

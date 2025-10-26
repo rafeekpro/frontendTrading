@@ -11,6 +11,7 @@ import { InstrumentsList } from './pages/InstrumentsList';
 import { InstrumentDetail } from './pages/InstrumentDetail';
 import { Watchlist } from './pages/Watchlist';
 import { Login } from './pages/Login';
+import { Register } from './pages/Register';
 import { queryClient } from './lib/query-client';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
             <Routes>
               {/* Public routes */}
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route path="/" element={<ComponentShowcase />} />
 
               {/* Protected routes */}

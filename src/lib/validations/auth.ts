@@ -18,7 +18,7 @@ export const loginSchema = z.object({
 // Register schema with password confirmation
 export const registerSchema = z
   .object({
-    name: z.string().min(2, 'Name must be at least 2 characters').min(1, 'Name is required'),
+    name: z.string().min(1, 'Name is required').min(2, 'Name must be at least 2 characters'),
     email: z.string().min(1, 'Email is required').email('Invalid email address'),
     password: z
       .string()
