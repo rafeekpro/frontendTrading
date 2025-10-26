@@ -1,15 +1,15 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/layout';
-import ComponentShowcase from './pages/ComponentShowcase';
 import { Dashboard } from './pages/Dashboard';
 import { InstrumentsList } from './pages/InstrumentsList';
 import { InstrumentDetail } from './pages/InstrumentDetail';
 import { Watchlist } from './pages/Watchlist';
+import { Settings } from './pages/Settings';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { queryClient } from './lib/query-client';
@@ -24,7 +24,7 @@ function App() {
               {/* Public routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/" element={<ComponentShowcase />} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
               {/* Protected routes */}
               <Route
@@ -63,6 +63,16 @@ function App() {
                   <ProtectedRoute>
                     <Layout>
                       <InstrumentDetail />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings/*"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Settings />
                     </Layout>
                   </ProtectedRoute>
                 }
