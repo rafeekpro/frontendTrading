@@ -1,23 +1,31 @@
-import { Menu, Search, User, Sun } from 'lucide-react';
+import { Menu, Search, User, Sun, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface HeaderProps {
   onMenuClick?: () => void;
 }
 
-const PROFILE_MENU_ITEMS = [
-  { label: 'My Account', action: 'account' },
-  { label: 'Settings', action: 'settings' },
-  { label: 'Logout', action: 'logout' },
-] as const;
-
 export function Header({ onMenuClick }: HeaderProps) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
   return (
     <header
       role="banner"
@@ -73,11 +81,32 @@ export function Header({ onMenuClick }: HeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" role="menu">
-            {PROFILE_MENU_ITEMS.map((item) => (
-              <DropdownMenuItem key={item.action} role="menuitem">
-                {item.label}
-              </DropdownMenuItem>
-            ))}
+            {user && (
+              <>
+                <div className="px-2 py-1.5 text-sm font-semibold">
+                  {user.name}
+                </div>
+                <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                  {user.email}
+                </div>
+                <DropdownMenuSeparator />
+              </>
+            )}
+            <DropdownMenuItem role="menuitem">
+              My Account
+            </DropdownMenuItem>
+            <DropdownMenuItem role="menuitem">
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              role="menuitem"
+              onClick={handleLogout}
+              className="text-red-600 dark:text-red-400"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

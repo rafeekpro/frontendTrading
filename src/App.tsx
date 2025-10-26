@@ -2,29 +2,72 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ThemeProvider } from './components/ThemeProvider';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/layout';
 import ComponentShowcase from './pages/ComponentShowcase';
 import { Dashboard } from './pages/Dashboard';
 import { InstrumentsList } from './pages/InstrumentsList';
 import { InstrumentDetail } from './pages/InstrumentDetail';
 import { Watchlist } from './pages/Watchlist';
+import { Login } from './pages/Login';
 import { queryClient } from './lib/query-client';
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <ThemeProvider>
-          <Layout>
+        <AuthProvider>
+          <ThemeProvider>
             <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<Login />} />
               <Route path="/" element={<ComponentShowcase />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/instruments" element={<InstrumentsList />} />
-              <Route path="/watchlist" element={<Watchlist />} />
-              <Route path="/instrument/:id" element={<InstrumentDetail />} />
+
+              {/* Protected routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Dashboard />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/instruments"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <InstrumentsList />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/watchlist"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Watchlist />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/instrument/:id"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <InstrumentDetail />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
-          </Layout>
-        </ThemeProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </BrowserRouter>
       {/* Add DevTools only in development mode */}
       {import.meta.env.DEV && (
