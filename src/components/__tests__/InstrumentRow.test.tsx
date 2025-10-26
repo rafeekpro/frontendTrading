@@ -97,7 +97,7 @@ describe('InstrumentRow', () => {
 
     render(<InstrumentRow {...defaultProps} instrument={neutralInstrument} />);
 
-    const changeElement = screen.getByText('0.00%');
+    const changeElement = screen.getByText('+0.00%');
     expect(changeElement).toHaveClass(/text-gray/);
   });
 
@@ -182,7 +182,12 @@ describe('InstrumentRow', () => {
 
     render(<InstrumentRow {...defaultProps} onNavigate={handleNavigate} />);
 
-    // Tab to row
+    // Tab to star button first (it's first in DOM)
+    await user.tab();
+    const starButton = screen.getByRole('button', { name: /watchlist/i });
+    expect(starButton).toHaveFocus();
+
+    // Tab to row button
     await user.tab();
     const row = screen.getByRole('button', { name: /view details/i });
     expect(row).toHaveFocus();
@@ -217,8 +222,8 @@ describe('InstrumentRow', () => {
 
     render(<InstrumentRow {...defaultProps} instrument={largeVolumeInstrument} />);
 
-    // Volume should be formatted as 28.5B
-    expect(screen.getByText(/28\.5B/i)).toBeInTheDocument();
+    // Volume should be formatted as 28.50B (2 decimal places)
+    expect(screen.getByText(/28\.50B/i)).toBeInTheDocument();
   });
 
   it('should format small volume numbers correctly', () => {
@@ -229,8 +234,8 @@ describe('InstrumentRow', () => {
 
     render(<InstrumentRow {...defaultProps} instrument={smallVolumeInstrument} />);
 
-    // Volume should be formatted as 1.5K
-    expect(screen.getByText(/1\.5K/i)).toBeInTheDocument();
+    // Volume should be formatted as 1.50K (2 decimal places)
+    expect(screen.getByText(/1\.50K/i)).toBeInTheDocument();
   });
 
   it('should handle optional onToggleWatchlist prop', async () => {
