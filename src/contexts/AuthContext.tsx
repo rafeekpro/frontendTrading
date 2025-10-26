@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo, useCallback, ReactNode } from 'react';
 
 /**
  * User type from auth API
@@ -78,7 +78,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = useCallback(async (email: string, password: string): Promise<void> => {
     setLoading(true);
     setError(null);
 
@@ -112,9 +112,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const logout = async (): Promise<void> => {
+  const logout = useCallback(async (): Promise<void> => {
     try {
       // Call logout API if we have a token
       if (token) {
@@ -135,10 +135,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(null);
       setError(null);
     }
-  };
+  }, [token]);
+
+  const value = useMemo(
+    () => ({ user, token, loading, error, login, logout }),
+    [user, token, loading, error, login, logout]
+  );
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, error, login, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
