@@ -1,18 +1,19 @@
-import { useState, FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
+import { loginSchema, type LoginFormData } from '../lib/validations/auth';
 
 /**
  * Login Page Component
  *
  * Provides user authentication interface with email/password form.
+ * Uses React Hook Form + Zod for validation.
  * Redirects to previous page or dashboard after successful login.
  */
 export function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const { login, loading, error } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,11 +21,19 @@ export function Login() {
   // Get the return URL from location state, default to dashboard
   const from = (location.state as { from?: string })?.from || '/dashboard';
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  // React Hook Form with Zod validation
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onBlur', // Validate on blur, not on change
+  });
 
+  const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(email, password);
+      await login(data.email, data.password);
       // Navigate to the page user was trying to access, or dashboard
       navigate(from, { replace: true });
     } catch (err) {
@@ -45,7 +54,7 @@ export function Login() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="rounded-md shadow-sm space-y-4">
             <div>
               <label htmlFor="email" className="sr-only">
@@ -53,15 +62,17 @@ export function Login() {
               </label>
               <input
                 id="email"
-                name="email"
                 type="email"
                 autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...register('email')}
                 className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
               />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
             <div>
               <label htmlFor="password" className="sr-only">
@@ -69,15 +80,17 @@ export function Login() {
               </label>
               <input
                 id="password"
-                name="password"
                 type="password"
                 autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register('password')}
                 className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
               />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -93,10 +106,10 @@ export function Login() {
             </p>
             <div className="space-y-1 text-xs text-blue-700 dark:text-blue-300">
               <p>Email: user@example.com</p>
-              <p>Password: password123</p>
+              <p>Password: Password123</p>
               <p className="mt-2">or</p>
               <p>Email: trader@example.com</p>
-              <p>Password: secure123</p>
+              <p>Password: Secure123</p>
             </div>
           </div>
 

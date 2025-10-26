@@ -46,7 +46,7 @@ const MOCK_USERS: Map<string, { password: string; user: User }> = new Map([
   [
     'user@example.com',
     {
-      password: 'password123',
+      password: 'Password123',
       user: {
         id: 'user-1',
         email: 'user@example.com',
@@ -58,7 +58,7 @@ const MOCK_USERS: Map<string, { password: string; user: User }> = new Map([
   [
     'trader@example.com',
     {
-      password: 'secure123',
+      password: 'Secure123',
       user: {
         id: 'user-2',
         email: 'trader@example.com',
