@@ -24,13 +24,13 @@ import { addMockMarketDataToAll } from '../lib/mock-market-data';
 /**
  * Sort column configuration (constant to avoid recreation)
  */
-const SORT_COLUMNS = [
-  { key: 'symbol' as SortColumn, label: 'Symbol' },
-  { key: 'name' as SortColumn, label: 'Name' },
-  { key: 'price' as SortColumn, label: 'Price' },
-  { key: 'change' as SortColumn, label: 'Change' },
-  { key: 'volume' as SortColumn, label: 'Volume' },
-] as const;
+const SORT_COLUMNS: Array<{ key: SortColumn; label: string }> = [
+  { key: 'symbol', label: 'Symbol' },
+  { key: 'name', label: 'Name' },
+  { key: 'price', label: 'Price' },
+  { key: 'change', label: 'Change' },
+  { key: 'volume', label: 'Volume' },
+];
 
 /**
  * InstrumentsList - Main instruments list page
@@ -200,6 +200,8 @@ export function InstrumentsList() {
         >
           {virtualizer.getVirtualItems().map((virtualRow) => {
             const instrument = filteredInstruments[virtualRow.index];
+            if (!instrument) return null; // Safety check for undefined
+
             return (
               <div
                 key={virtualRow.key}

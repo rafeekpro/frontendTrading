@@ -5,6 +5,7 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { Layout } from './components/layout';
 import ComponentShowcase from './pages/ComponentShowcase';
 import { Dashboard } from './pages/Dashboard';
+import { InstrumentsList } from './pages/InstrumentsList';
 import { InstrumentDetail } from './pages/InstrumentDetail';
 import { Watchlist } from './pages/Watchlist';
 import { queryClient } from './lib/query-client';
@@ -18,6 +19,7 @@ function App() {
             <Routes>
               <Route path="/" element={<ComponentShowcase />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/instruments" element={<InstrumentsList />} />
               <Route path="/watchlist" element={<Watchlist />} />
               <Route path="/instrument/:id" element={<InstrumentDetail />} />
             </Routes>
