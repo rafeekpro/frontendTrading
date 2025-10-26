@@ -19,17 +19,16 @@ describe('Tailwind CSS Configuration', () => {
   });
 
   it('should process Tailwind directives in CSS', async () => {
-    // Read the CSS file source and verify it contains Tailwind directives
+    // Read the CSS file source and verify it contains Tailwind v4 directives
     const fs = await import('fs');
     const path = await import('path');
     const cssPath = path.resolve(process.cwd(), 'src/index.css');
     const cssContent = fs.readFileSync(cssPath, 'utf-8');
 
-    // These directives should be present after Tailwind is configured
-    // This test will fail until we add Tailwind directives to index.css
-    expect(cssContent).toContain('@tailwind base');
-    expect(cssContent).toContain('@tailwind components');
-    expect(cssContent).toContain('@tailwind utilities');
+    // Tailwind v4 uses @import instead of @tailwind directives
+    // Verify the new CSS-first configuration syntax is present
+    expect(cssContent).toContain('@import "tailwindcss"');
+    expect(cssContent).toContain('@theme');
   });
 
   it('should have PostCSS configuration file', async () => {
@@ -72,16 +71,17 @@ describe('Tailwind CSS Configuration', () => {
   });
 
   it('should have trading-specific theme colors configured', async () => {
-    // Verify custom theme colors for trading (green for profit, red for loss)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const tailwindConfig = (await import('../../tailwind.config.js')) as any;
+    // Tailwind v4: Theme colors are defined in CSS using @theme, not in config file
+    // Verify trading colors exist in the CSS configuration
+    const fs = await import('fs');
+    const path = await import('path');
+    const cssPath = path.resolve(process.cwd(), 'src/index.css');
+    const cssContent = fs.readFileSync(cssPath, 'utf-8');
 
-    expect(tailwindConfig.default.theme?.extend?.colors).toBeDefined();
-
-    const colors = tailwindConfig.default.theme.extend.colors;
-
-    // Trading colors should be configured
-    expect(colors).toHaveProperty('profit');
-    expect(colors).toHaveProperty('loss');
+    // Trading colors should be defined as CSS custom properties in @theme block
+    expect(cssContent).toContain('--color-profit');
+    expect(cssContent).toContain('--color-loss');
+    expect(cssContent).toContain('--color-profit-light');
+    expect(cssContent).toContain('--color-loss-light');
   });
 });
