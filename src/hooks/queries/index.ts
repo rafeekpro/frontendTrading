@@ -7,3 +7,4 @@ export { useInstruments } from './use-instruments';
 export { useInstrument } from './use-instrument';
 export { useTrades } from './use-trades';
 export { useMarketData } from './use-market-data';
+export { useOHLCVData } from './use-ohlcv-data';
