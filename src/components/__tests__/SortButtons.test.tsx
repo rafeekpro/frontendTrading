@@ -56,8 +56,8 @@ describe('SortButtons', () => {
   it('should not display icon for inactive columns', () => {
     render(<SortButtons {...defaultProps} sortColumn="symbol" sortDirection="asc" />);
 
-    const nameButton = screen.getByRole('button', { name: /^name$/i });
-    const priceButton = screen.getByRole('button', { name: /price/i });
+    const nameButton = screen.getByRole('button', { name: /sort by name/i });
+    const priceButton = screen.getByRole('button', { name: /sort by price/i });
 
     // Inactive columns should not have sort icons
     expect(nameButton.querySelector('svg')).not.toBeInTheDocument();
@@ -70,7 +70,7 @@ describe('SortButtons', () => {
 
     render(<SortButtons {...defaultProps} onSortChange={handleSortChange} />);
 
-    const nameButton = screen.getByRole('button', { name: /^name$/i });
+    const nameButton = screen.getByRole('button', { name: /sort by name/i });
     await user.click(nameButton);
 
     expect(handleSortChange).toHaveBeenCalledWith('name', 'asc');
@@ -164,7 +164,7 @@ describe('SortButtons', () => {
 
     render(<SortButtons {...defaultProps} onSortChange={handleSortChange} />);
 
-    const nameButton = screen.getByRole('button', { name: /^name$/i });
+    const nameButton = screen.getByRole('button', { name: /sort by name/i });
 
     // Click twice rapidly
     await user.click(nameButton);
@@ -186,7 +186,7 @@ describe('SortButtons', () => {
   it('should show hover effect on buttons', () => {
     render(<SortButtons {...defaultProps} />);
 
-    const nameButton = screen.getByRole('button', { name: /^name$/i });
+    const nameButton = screen.getByRole('button', { name: /sort by name/i });
 
     // Should have hover styles
     expect(nameButton).toHaveClass(/hover:/);
