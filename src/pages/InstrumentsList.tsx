@@ -1,9 +1,9 @@
 /**
  * InstrumentsList Page Component
- * GREEN PHASE: Main list page with virtual scrolling, search, filter, and sort
+ * REFACTOR PHASE: Optimized with extracted utilities and performance improvements
  */
 
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useInstruments } from '../hooks/queries/use-instruments';
@@ -19,7 +19,18 @@ import {
   type SortDirection,
   type InstrumentWithMarketData,
 } from '../lib/list-utils';
-import type { Instrument } from '../types/trading';
+import { addMockMarketDataToAll } from '../lib/mock-market-data';
+
+/**
+ * Sort column configuration (constant to avoid recreation)
+ */
+const SORT_COLUMNS = [
+  { key: 'symbol' as SortColumn, label: 'Symbol' },
+  { key: 'name' as SortColumn, label: 'Name' },
+  { key: 'price' as SortColumn, label: 'Price' },
+  { key: 'change' as SortColumn, label: 'Change' },
+  { key: 'volume' as SortColumn, label: 'Volume' },
+] as const;
 
 /**
  * InstrumentsList - Main instruments list page
@@ -31,6 +42,12 @@ import type { Instrument } from '../types/trading';
  * - Navigation to instrument detail
  * - Dark theme Squaber design
  * - Responsive layout
+ *
+ * Performance optimizations:
+ * - Memoized data transformations
+ * - Memoized event handlers
+ * - Virtual scrolling for large lists
+ * - Constant sort column configuration
  *
  * @example
  * ```tsx
@@ -50,17 +67,10 @@ export function InstrumentsList() {
   const { data: instruments, isLoading, error } = useInstruments();
   const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
 
-  // Transform instruments to include market data
+  // Transform instruments to include market data (memoized)
   const instrumentsWithMarketData = useMemo<InstrumentWithMarketData[]>(() => {
     if (!instruments) return [];
-
-    return instruments.map((instrument) => ({
-      ...instrument,
-      exchange: getExchangeForInstrument(instrument),
-      currentPrice: getMockPrice(instrument),
-      change24h: getMockChange24h(instrument),
-      volume24h: getMockVolume24h(instrument),
-    }));
+    return addMockMarketDataToAll(instruments);
   }, [instruments]);
 
   // Apply filters and sort
@@ -85,23 +95,23 @@ export function InstrumentsList() {
     overscan: 5,
   });
 
-  // Event handlers
-  const handleNavigate = (id: string) => {
+  // Event handlers (memoized to prevent unnecessary re-renders)
+  const handleNavigate = useCallback((id: string) => {
     navigate(`/instrument/${id}`);
-  };
+  }, [navigate]);
 
-  const handleToggleWatchlist = (id: string) => {
+  const handleToggleWatchlist = useCallback((id: string) => {
     if (isInWatchlist(id)) {
       removeFromWatchlist(id);
     } else {
       addToWatchlist(id);
     }
-  };
+  }, [isInWatchlist, addToWatchlist, removeFromWatchlist]);
 
-  const handleSortChange = (column: SortColumn, direction: SortDirection) => {
+  const handleSortChange = useCallback((column: SortColumn, direction: SortDirection) => {
     setSortColumn(column);
     setSortDirection(direction);
-  };
+  }, []);
 
   // Loading state
   if (isLoading) {
@@ -150,15 +160,6 @@ export function InstrumentsList() {
     );
   }
 
-  // Define sort column configuration
-  const sortColumns = [
-    { key: 'symbol' as SortColumn, label: 'Symbol' },
-    { key: 'name' as SortColumn, label: 'Name' },
-    { key: 'price' as SortColumn, label: 'Price' },
-    { key: 'change' as SortColumn, label: 'Change' },
-    { key: 'volume' as SortColumn, label: 'Volume' },
-  ];
-
   // Main list view
   return (
     <div className="min-h-screen bg-gray-900 p-6">
@@ -178,7 +179,7 @@ export function InstrumentsList() {
 
       {/* Sort Controls */}
       <SortButtons
-        columns={sortColumns}
+        columns={SORT_COLUMNS}
         sortColumn={sortColumn}
         sortDirection={sortDirection}
         onSortChange={handleSortChange}
@@ -225,95 +226,4 @@ export function InstrumentsList() {
       </div>
     </div>
   );
-}
-
-// Helper functions for mock market data
-
-/**
- * Get exchange for instrument based on type
- */
-function getExchangeForInstrument(instrument: Instrument): string {
-  switch (instrument.type) {
-    case 'forex':
-      return 'FOREX';
-    case 'crypto':
-      return 'CRYPTO';
-    case 'stock':
-      return getStockExchange(instrument.symbol);
-    case 'index':
-      return 'INDEX';
-    case 'commodity':
-      return 'COMMODITY';
-    default:
-      return 'UNKNOWN';
-  }
-}
-
-/**
- * Get stock exchange based on symbol pattern
- */
-function getStockExchange(symbol: string): string {
-  // Simple heuristic - in real app, this would come from API
-  if (symbol.includes('.L')) return 'LSE';
-  if (symbol.includes('.HK')) return 'HKEX';
-  if (symbol.includes('.T')) return 'TSE';
-  return 'NASDAQ';
-}
-
-/**
- * Generate mock current price
- */
-function getMockPrice(instrument: Instrument): number {
-  // Use instrument ID hash for deterministic mock data
-  const hash = hashString(instrument.id);
-  const basePrice = (hash % 10000) + 1;
-
-  switch (instrument.type) {
-    case 'forex':
-      return basePrice / 10000 + 1.0; // 1.0 - 2.0 range
-    case 'crypto':
-      return basePrice * 5; // 0 - 50000 range
-    case 'stock':
-      return basePrice / 50; // 0 - 200 range
-    default:
-      return basePrice / 100;
-  }
-}
-
-/**
- * Generate mock 24h change percentage
- */
-function getMockChange24h(instrument: Instrument): number {
-  const hash = hashString(instrument.id + 'change');
-  return ((hash % 1000) - 500) / 100; // -5% to +5% range
-}
-
-/**
- * Generate mock 24h volume
- */
-function getMockVolume24h(instrument: Instrument): number {
-  const hash = hashString(instrument.id + 'volume');
-  const base = (hash % 100000000) + 1000000;
-
-  switch (instrument.type) {
-    case 'crypto':
-      return base * 10;
-    case 'stock':
-      return base * 5;
-    default:
-      return base;
-  }
-}
-
-/**
- * Simple string hash function for deterministic mock data
- */
-function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  return Math.abs(hash);
 }
