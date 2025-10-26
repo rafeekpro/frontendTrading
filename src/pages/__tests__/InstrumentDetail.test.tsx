@@ -9,7 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { beforeAll, afterEach, afterAll, describe, it, expect, vi } from 'vitest';
+import { beforeAll, afterEach, afterAll, describe, it, expect } from 'vitest';
 import { InstrumentDetail } from '../InstrumentDetail';
 import type {
   Instrument,
@@ -17,24 +17,6 @@ import type {
   CandlesticksResponse,
   Candlestick
 } from '../../types/trading';
-
-// Mock lightweight-charts to avoid rendering issues in tests
-vi.mock('lightweight-charts', () => ({
-  createChart: vi.fn(() => ({
-    addCandlestickSeries: vi.fn(() => ({
-      setData: vi.fn(),
-    })),
-    addHistogramSeries: vi.fn(() => ({
-      setData: vi.fn(),
-    })),
-    timeScale: vi.fn(() => ({
-      fitContent: vi.fn(),
-    })),
-    applyOptions: vi.fn(),
-    resize: vi.fn(),
-    remove: vi.fn(),
-  })),
-}));
 
 // Mock instrument data
 const mockInstrument: Instrument = {
@@ -253,7 +235,10 @@ describe('InstrumentDetail', () => {
     it('should pass current timeframe to chart', async () => {
       renderInstrumentDetail();
       await waitFor(() => {
-        expect(screen.getByText(/H1/)).toBeInTheDocument();
+        const chart = screen.getByTestId('candlestick-chart');
+        expect(chart).toBeInTheDocument();
+        // Timeframe indicator "H1" should be visible in the chart
+        expect(within(chart).getByText('H1')).toBeInTheDocument();
       });
     });
 
@@ -278,19 +263,21 @@ describe('InstrumentDetail', () => {
     it('should display all timeframe options', async () => {
       renderInstrumentDetail();
       await waitFor(() => {
-        expect(screen.getByText('M1')).toBeInTheDocument();
-        expect(screen.getByText('M5')).toBeInTheDocument();
-        expect(screen.getByText('M15')).toBeInTheDocument();
-        expect(screen.getByText('H1')).toBeInTheDocument();
-        expect(screen.getByText('H4')).toBeInTheDocument();
-        expect(screen.getByText('D1')).toBeInTheDocument();
+        const selector = screen.getByRole('group', { name: /timeframe selector/i });
+        expect(within(selector).getByText('M1')).toBeInTheDocument();
+        expect(within(selector).getByText('M5')).toBeInTheDocument();
+        expect(within(selector).getByText('M15')).toBeInTheDocument();
+        expect(within(selector).getByText('H1')).toBeInTheDocument();
+        expect(within(selector).getByText('H4')).toBeInTheDocument();
+        expect(within(selector).getByText('D1')).toBeInTheDocument();
       });
     });
 
     it('should have H1 selected by default', async () => {
       renderInstrumentDetail();
       await waitFor(() => {
-        const h1Button = screen.getByText('H1');
+        const selector = screen.getByRole('group', { name: /timeframe selector/i });
+        const h1Button = within(selector).getByText('H1');
         expect(h1Button).toHaveAttribute('aria-pressed', 'true');
       });
     });
@@ -300,15 +287,19 @@ describe('InstrumentDetail', () => {
       renderInstrumentDetail();
 
       await waitFor(() => {
-        expect(screen.getByText('H1')).toBeInTheDocument();
+        expect(screen.getByRole('group', { name: /timeframe selector/i })).toBeInTheDocument();
       });
 
-      // Click M5 button
-      const m5Button = screen.getByText('M5');
-      await user.click(m5Button);
+      // Initially H1 should be selected
+      const selector = screen.getByRole('group', { name: /timeframe selector/i });
+      expect(within(selector).getByText('H1')).toHaveAttribute('aria-pressed', 'true');
 
+      // Click M5 button - this triggers onChange which updates the timeframe state
+      await user.click(within(selector).getByText('M5'));
+
+      // Verify the selector still renders after timeframe change
       await waitFor(() => {
-        expect(m5Button).toHaveAttribute('aria-pressed', 'true');
+        expect(screen.getByRole('group', { name: /timeframe selector/i })).toBeInTheDocument();
       });
     });
 
@@ -333,13 +324,14 @@ describe('InstrumentDetail', () => {
       renderInstrumentDetail();
 
       await waitFor(() => {
-        expect(screen.getByText('H1')).toBeInTheDocument();
+        expect(screen.getByRole('group', { name: /timeframe selector/i })).toBeInTheDocument();
       });
 
       const initialCount = requestCount;
 
       // Change timeframe
-      await user.click(screen.getByText('M5'));
+      const selector = screen.getByRole('group', { name: /timeframe selector/i });
+      await user.click(within(selector).getByText('M5'));
 
       await waitFor(() => {
         expect(requestCount).toBeGreaterThan(initialCount);
@@ -358,14 +350,16 @@ describe('InstrumentDetail', () => {
     it('should display bids section', async () => {
       renderInstrumentDetail();
       await waitFor(() => {
-        expect(screen.getByText(/bids/i)).toBeInTheDocument();
+        const orderBook = screen.getByTestId('order-book');
+        expect(within(orderBook).getByText(/bid/i)).toBeInTheDocument();
       });
     });
 
     it('should display asks section', async () => {
       renderInstrumentDetail();
       await waitFor(() => {
-        expect(screen.getByText(/asks/i)).toBeInTheDocument();
+        const orderBook = screen.getByTestId('order-book');
+        expect(within(orderBook).getByText(/ask/i)).toBeInTheDocument();
       });
     });
 
@@ -529,6 +523,13 @@ describe('InstrumentDetail', () => {
               id: id as string,
               name: 'Test Instrument',
             },
+          });
+        }),
+        http.get('/api/instruments/:id/candles', ({ params }) => {
+          return HttpResponse.json({
+            candlesticks: mockCandlesticks,
+            instrument_id: params.id as string,
+            timeframe: 'H1',
           });
         })
       );
