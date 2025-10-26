@@ -5,10 +5,15 @@
  * RED PHASE: These tests MUST FAIL - no implementation exists yet
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, afterEach, afterAll, vi } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
+import { setupServer } from 'msw/node';
 import { AuthProvider, useAuth } from '../../contexts/AuthContext';
+import { authHandlers } from '../../mocks/handlers/auth';
 import type { ReactNode } from 'react';
+
+// Setup MSW test server
+const server = setupServer(...authHandlers);
 
 // Test wrapper with AuthProvider
 function createWrapper() {
@@ -18,10 +23,21 @@ function createWrapper() {
 }
 
 describe('useAuth', () => {
+  // Start MSW server before all tests
+  beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+
   beforeEach(() => {
     // Clear localStorage before each test
     localStorage.clear();
   });
+
+  // Reset handlers after each test
+  afterEach(() => {
+    server.resetHandlers();
+  });
+
+  // Clean up after all tests
+  afterAll(() => server.close());
 
   it('should return current auth state (user, token, loading, error)', () => {
     const { result } = renderHook(() => useAuth(), {

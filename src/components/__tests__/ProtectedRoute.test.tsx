@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { setupServer } from 'msw/node';
 import { AuthProvider, useAuth } from '../../contexts/AuthContext';
 import { ProtectedRoute } from '../ProtectedRoute';
@@ -76,7 +76,7 @@ describe('ProtectedRoute', () => {
     localStorage.setItem('auth_token', 'valid-token-123');
 
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <AuthProvider>
           <Routes>
             <Route
@@ -89,7 +89,7 @@ describe('ProtectedRoute', () => {
             />
           </Routes>
         </AuthProvider>
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
     // Should show protected content after auth check
@@ -100,7 +100,7 @@ describe('ProtectedRoute', () => {
 
   it('should redirect to /login when not authenticated', async () => {
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <AuthProvider>
           <Routes>
             <Route
@@ -114,7 +114,7 @@ describe('ProtectedRoute', () => {
             <Route path="/login" element={<LoginPage />} />
           </Routes>
         </AuthProvider>
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
     // Should redirect to login page
@@ -127,7 +127,7 @@ describe('ProtectedRoute', () => {
 
   it('should preserve return URL in redirect location state', async () => {
     render(
-      <BrowserRouter initialEntries={['/dashboard']}>
+      <MemoryRouter initialEntries={['/dashboard']}>
         <AuthProvider>
           <Routes>
             <Route
@@ -141,7 +141,7 @@ describe('ProtectedRoute', () => {
             <Route path="/login" element={<LoginPage />} />
           </Routes>
         </AuthProvider>
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
     // Should redirect to login with return URL
@@ -158,7 +158,7 @@ describe('ProtectedRoute', () => {
   it('should show loading spinner during auth check', () => {
     // Don't pre-set token, let it check on mount
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <AuthProvider>
           <Routes>
             <Route
@@ -172,7 +172,7 @@ describe('ProtectedRoute', () => {
             <Route path="/login" element={<LoginPage />} />
           </Routes>
         </AuthProvider>
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
     // Should show loading state initially
@@ -185,7 +185,7 @@ describe('ProtectedRoute', () => {
 
   it('should re-check auth when token changes', async () => {
     const { rerender } = render(
-      <BrowserRouter>
+      <MemoryRouter>
         <AuthProvider>
           <Routes>
             <Route
@@ -199,7 +199,7 @@ describe('ProtectedRoute', () => {
             <Route path="/login" element={<LoginPage />} />
           </Routes>
         </AuthProvider>
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
     // Initially should redirect to login
@@ -212,7 +212,7 @@ describe('ProtectedRoute', () => {
 
     // Force rerender
     rerender(
-      <BrowserRouter>
+      <MemoryRouter>
         <AuthProvider>
           <Routes>
             <Route
@@ -226,7 +226,7 @@ describe('ProtectedRoute', () => {
             <Route path="/login" element={<LoginPage />} />
           </Routes>
         </AuthProvider>
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
     // Should now show protected content
@@ -240,7 +240,7 @@ describe('ProtectedRoute', () => {
     localStorage.setItem('auth_token', 'valid-token-123');
 
     const { rerender } = render(
-      <BrowserRouter>
+      <MemoryRouter>
         <AuthProvider>
           <Routes>
             <Route
@@ -254,7 +254,7 @@ describe('ProtectedRoute', () => {
             <Route path="/login" element={<LoginPage />} />
           </Routes>
         </AuthProvider>
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
     // Should show protected content
@@ -267,7 +267,7 @@ describe('ProtectedRoute', () => {
 
     // Force rerender
     rerender(
-      <BrowserRouter>
+      <MemoryRouter>
         <AuthProvider>
           <Routes>
             <Route
@@ -281,7 +281,7 @@ describe('ProtectedRoute', () => {
             <Route path="/login" element={<LoginPage />} />
           </Routes>
         </AuthProvider>
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
     // Should redirect to login
