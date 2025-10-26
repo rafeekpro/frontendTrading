@@ -12,6 +12,25 @@ import { InstrumentsList } from '../InstrumentsList';
 import type { Instrument } from '../../types/trading';
 import type { InstrumentWithMarketData } from '../../lib/list-utils';
 
+// Mock @tanstack/react-virtual for JSDOM testing
+vi.mock('@tanstack/react-virtual', () => ({
+  useVirtualizer: ({ count }: { count: number }) => {
+    // Mock virtualizer that renders all items (no actual virtualization in tests)
+    const items = Array.from({ length: count }, (_, index) => ({
+      key: index,
+      index,
+      start: index * 60,
+      size: 60,
+    }));
+
+    return {
+      getTotalSize: () => count * 60,
+      getVirtualItems: () => items,
+      measureElement: () => {},
+    };
+  },
+}));
+
 // Mock useNavigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -283,10 +302,15 @@ describe('InstrumentsList Page', () => {
       const clearButton = screen.getByLabelText(/clear search/i);
       await user.click(clearButton);
 
-      await waitFor(() => {
-        expect(screen.getByText('EUR/USD')).toBeInTheDocument();
-        expect(screen.getByText('BTC/USD')).toBeInTheDocument();
-      });
+      // Wait for debounce to clear and all instruments to re-appear
+      await waitFor(
+        () => {
+          expect(screen.getByText('EUR/USD')).toBeInTheDocument();
+          expect(screen.getByText('BTC/USD')).toBeInTheDocument();
+          expect(screen.getByText('AAPL')).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
     });
   });
 
@@ -398,7 +422,8 @@ describe('InstrumentsList Page', () => {
       render(<InstrumentsList />, { wrapper: createWrapper() });
 
       await waitFor(() => {
-        expect(screen.getByLabelText(/sort by symbol/i)).toBeInTheDocument();
+        // Symbol button is active by default, so has "sorted ascending" label
+        expect(screen.getByLabelText(/symbol.*sorted ascending/i)).toBeInTheDocument();
         expect(screen.getByLabelText(/sort by name/i)).toBeInTheDocument();
         expect(screen.getByLabelText(/sort by price/i)).toBeInTheDocument();
       });
@@ -437,12 +462,15 @@ describe('InstrumentsList Page', () => {
       const priceSortButton = screen.getByLabelText(/sort by price/i);
       await user.click(priceSortButton);
 
-      await waitFor(() => {
-        const rows = screen.getAllByRole('button', { name: /view details/i });
-        expect(rows[0]).toHaveTextContent('EUR/USD'); // 1.0850
-        expect(rows[1]).toHaveTextContent('GBP/USD'); // 1.2650
-        expect(rows[2]).toHaveTextContent('AAPL'); // 175.5
-      });
+      await waitFor(
+        () => {
+          const rows = screen.getAllByRole('button', { name: /view details/i });
+          expect(rows[0]).toHaveTextContent('EUR/USD'); // 1.0850
+          expect(rows[1]).toHaveTextContent('GBP/USD'); // 1.2650
+          expect(rows[2]).toHaveTextContent('AAPL'); // 175.5
+        },
+        { timeout: 500 }
+      );
     });
 
     it('should toggle sort direction', async () => {
@@ -459,23 +487,24 @@ describe('InstrumentsList Page', () => {
         expect(screen.getByText('EUR/USD')).toBeInTheDocument();
       });
 
-      const symbolSortButton = screen.getByLabelText(/sort by symbol/i);
-
-      // First click should keep ascending
-      await user.click(symbolSortButton);
-
-      await waitFor(() => {
-        const rows = screen.getAllByRole('button', { name: /view details/i });
-        expect(rows[0]).toHaveTextContent('AAPL');
-      });
-
-      // Second click should toggle to descending
+      // Symbol is already sorted ascending by default
+      // First click should toggle to descending (since it's already active)
+      const symbolSortButton = screen.getByLabelText(/symbol.*sorted ascending/i);
       await user.click(symbolSortButton);
 
       await waitFor(() => {
         const rows = screen.getAllByRole('button', { name: /view details/i });
         expect(rows[0]).toHaveTextContent('GBP/USD');
         expect(rows[4]).toHaveTextContent('AAPL');
+      });
+
+      // Second click should toggle back to ascending
+      const symbolSortButtonDesc = screen.getByLabelText(/symbol.*sorted descending/i);
+      await user.click(symbolSortButtonDesc);
+
+      await waitFor(() => {
+        const rows = screen.getAllByRole('button', { name: /view details/i });
+        expect(rows[0]).toHaveTextContent('AAPL');
       });
     });
   });
@@ -555,8 +584,9 @@ describe('InstrumentsList Page', () => {
       render(<InstrumentsList />, { wrapper: createWrapper() });
 
       await waitFor(() => {
-        const addStar = screen.getByLabelText(/add EUR\/USD to watchlist/i);
-        expect(addStar).toHaveClass('fill-yellow-400');
+        // EUR/USD (inst-1) is already in watchlist mock, so label is "Remove"
+        const removeStar = screen.getByLabelText(/remove EUR\/USD from watchlist/i);
+        expect(removeStar).toHaveClass('fill-yellow-400');
       });
     });
 
